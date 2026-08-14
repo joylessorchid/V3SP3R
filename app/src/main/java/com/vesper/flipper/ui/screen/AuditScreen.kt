@@ -20,6 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vesper.flipper.domain.model.*
+import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.SectionLabel
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.AuditFilterType
 import com.vesper.flipper.ui.viewmodel.AuditViewModel
@@ -36,22 +38,30 @@ fun AuditScreen(
     val state by viewModel.state.collectAsState()
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text("Audit Log", fontWeight = FontWeight.Bold)
-                },
-                actions = {
-                    var showMenu by remember { mutableStateOf(false) }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            ) {
+                var showMenu by remember { mutableStateOf(false) }
 
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "More")
-                    }
-
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Box {
+                        GlassIconButton(
+                            icon = Icons.Default.MoreVert,
+                            contentDescription = "More",
+                            onClick = { showMenu = true }
+                        )
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
                         DropdownMenuItem(
                             text = { Text("Clear all logs") },
                             onClick = {
@@ -72,12 +82,19 @@ fun AuditScreen(
                                 Icon(Icons.Default.CleaningServices, contentDescription = null)
                             }
                         )
+                        }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+                }
+
+                Spacer(Modifier.height(6.dp))
+                SectionLabel(text = "Every command the model ran")
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    "Audit",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = TextPrimary
                 )
-            )
+            }
         }
     ) { padding ->
         Column(

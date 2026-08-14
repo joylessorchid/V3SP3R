@@ -21,6 +21,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vesper.flipper.domain.model.FileEntry
+import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.SectionLabel
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.FileBrowserViewModel
 
@@ -32,39 +34,48 @@ fun FileBrowserScreen(
     val state by viewModel.state.collectAsState()
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            "File Browser",
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            state.currentPath,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                },
-                navigationIcon = {
+            // The path is the heading here — it changes as you navigate and is the
+            // only thing on screen that says where you are, so it gets the emphasis
+            // that "File Browser" used to take.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     if (state.currentPath != "/ext") {
-                        IconButton(onClick = { viewModel.navigateUp() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                        }
+                        GlassIconButton(
+                            icon = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            onClick = { viewModel.navigateUp() }
+                        )
+                    } else {
+                        Spacer(Modifier.size(40.dp))
                     }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.refresh() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+                    GlassIconButton(
+                        icon = Icons.Default.Refresh,
+                        contentDescription = "Refresh",
+                        onClick = { viewModel.refresh() }
+                    )
+                }
+                Spacer(Modifier.height(10.dp))
+                SectionLabel(text = "Flipper storage")
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    state.currentPath,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-            )
+            }
         }
     ) { padding ->
         Box(

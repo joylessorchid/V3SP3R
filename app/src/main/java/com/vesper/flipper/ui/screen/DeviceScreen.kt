@@ -33,6 +33,8 @@ import com.vesper.flipper.ble.FirmwareTransportMode
 import com.vesper.flipper.ble.FlipperDevice
 import com.vesper.flipper.domain.model.FlipperRemoteButton
 import com.vesper.flipper.glasses.BridgeState
+import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.SectionLabel
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.DeviceViewModel
 import kotlinx.coroutines.Job
@@ -64,51 +66,82 @@ fun DeviceScreen(
     val glassesBridgeUrl by viewModel.glassesBridgeUrl.collectAsState()
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text("Device", fontWeight = FontWeight.Bold)
-                },
-                actions = {
-                    if (connectionState is ConnectionState.Connected) {
-                        IconButton(onClick = onNavigateToFiles) {
-                            Icon(
-                                Icons.Default.Folder,
-                                contentDescription = "File Browser",
-                                tint = VesperOrange
-                            )
-                        }
-                        IconButton(
-                            onClick = { viewModel.refreshDeviceInfo() },
-                            enabled = !isRefreshing
-                        ) {
-                            if (isRefreshing) {
+            // Floating controls rather than a title bar, matching the chat screen.
+            // The screen's name moves into the content below, where it can be set
+            // large enough to actually act as a heading.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (connectionState is ConnectionState.Connected) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        GlassIconButton(
+                            icon = Icons.Default.Folder,
+                            contentDescription = "File browser",
+                            active = true,
+                            onClick = onNavigateToFiles
+                        )
+                        if (isRefreshing) {
+                            Box(
+                                modifier = Modifier.size(40.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(20.dp),
-                                    color = VesperOrange,
+                                    color = VesperAccent,
                                     strokeWidth = 2.dp
                                 )
-                            } else {
-                                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                             }
+                        } else {
+                            GlassIconButton(
+                                icon = Icons.Default.Refresh,
+                                contentDescription = "Refresh",
+                                onClick = { viewModel.refreshDeviceInfo() }
+                            )
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    // Transparent so the gradient backdrop runs behind the bar instead
-                    // of it sitting as an opaque slab across the top of the screen.
-                    containerColor = Color.Transparent
-                )
-            )
+                }
+            }
         }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            item {
+                Column {
+                    SectionLabel(
+                        text = when (connectionState) {
+                            is ConnectionState.Connected -> "Connected"
+                            is ConnectionState.Connecting -> "Connecting"
+                            is ConnectionState.Scanning -> "Scanning"
+                            is ConnectionState.Error -> "Error"
+                            else -> "Not connected"
+                        },
+                        tint = when (connectionState) {
+                            is ConnectionState.Connected -> VesperAqua
+                            is ConnectionState.Error -> RiskHigh
+                            else -> TextTertiary
+                        }
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "Device",
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = TextPrimary
+                    )
+                }
+            }
+
             // Connection Status Card
             item {
                 ConnectionStatusCard(

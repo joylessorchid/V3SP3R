@@ -34,25 +34,26 @@ fun SettingsScreen(
     val isRefreshingModels by viewModel.isRefreshingModels.collectAsState()
     var showApiKey by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text("Settings", fontWeight = FontWeight.Bold)
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-        }
-    ) { padding ->
+    // No app bar. Settings has no actions to put in one, so a bar here spent a row
+    // of the screen rendering the word "Settings" at 20sp. The heading moves into
+    // the content where it can be set at a size that actually leads the page.
+    Scaffold(containerColor = Color.Transparent) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            item {
+                Text(
+                    "Settings",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = TextPrimary
+                )
+            }
+
             // API Configuration Section
             item {
                 SettingsSection(title = "API Configuration") {
