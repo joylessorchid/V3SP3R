@@ -95,7 +95,9 @@ fun DeviceScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    // Transparent so the gradient backdrop runs behind the bar instead
+                    // of it sitting as an opaque slab across the top of the screen.
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -459,7 +461,7 @@ private fun DeviceInfoCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = GlassFill1
         )
     ) {
         Column(
@@ -650,7 +652,7 @@ private fun CommandAutomationStatusCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = GlassFill1
         )
     ) {
         Column(
@@ -815,7 +817,7 @@ private fun RemoteControlCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = GlassFill1
         )
     ) {
         Column(
@@ -1005,7 +1007,7 @@ private fun DeviceListItem(
             .fillMaxWidth()
             .clickable(enabled = !isConnecting, onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = GlassFill1
         )
     ) {
         Row(
@@ -1129,7 +1131,7 @@ private fun AdvancedOperationsSection(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = GlassFill1)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             // Expandable Header

@@ -83,7 +83,7 @@ fun PayloadLabScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.Transparent
                 )
             )
         },
@@ -97,7 +97,7 @@ fun PayloadLabScreen(
             // Tab Row
             TabRow(
                 selectedTabIndex = selectedTab,
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = Color.Transparent,
                 contentColor = VesperOrange
             ) {
                 tabs.forEachIndexed { index, title ->

@@ -228,8 +228,32 @@ class FlipperBleService : Service() {
     }
 
     private fun startForegroundService() {
+        // Android 14+ refuses a foregroundServiceType="connectedDevice" service unless the
+        // app holds a Bluetooth permission, and it signals that by throwing SecurityException
+        // rather than returning a failure. BleServiceManager binds from its own init block,
+        // which runs the moment anything injects it — bypassing the permission gate in
+        // MainActivity — so opening the Device screen with the permission declined took the
+        // whole app down.
+        //
+        // stopSelf() rather than a bare return: startService() launches us via
+        // startForegroundService(), so the platform expects startForeground() within a few
+        // seconds and throws ForegroundServiceDidNotStartInTimeException otherwise. Stopping
+        // immediately satisfies that contract.
+        if (!hasBluetoothPermissions()) {
+            Log.w(TAG, "startForegroundService: Bluetooth permission missing - stopping instead of crashing")
+            stopSelf()
+            return
+        }
+
         val notification = createNotification()
-        startForeground(NOTIFICATION_ID, notification)
+        // Even holding the permission the platform can still refuse: Android 12+ throws
+        // ForegroundServiceStartNotAllowedException when the start came from the background.
+        // Losing the background connection is recoverable; crashing is not.
+        runCatching { startForeground(NOTIFICATION_ID, notification) }
+            .onFailure { error ->
+                Log.w(TAG, "startForegroundService: platform refused the foreground service", error)
+                stopSelf()
+            }
     }
 
     private fun createNotification(): Notification {

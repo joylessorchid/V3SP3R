@@ -1,10 +1,14 @@
 package com.vesper.flipper.ble
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.IBinder
+import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -81,16 +85,40 @@ class BleServiceManager @Inject constructor(
     }
 
     /**
-     * Start and bind to the BLE service
+     * Start and bind to the BLE service.
+     *
+     * The promotion to a foreground service is deliberately conditional. This class binds
+     * from its own init block, so it runs as soon as anything injects it — before, and
+     * independently of, the permission prompt in MainActivity. Calling
+     * FlipperBleService.startService() in that state asks the platform for a
+     * connectedDevice foreground service without a Bluetooth permission, which Android 14+
+     * answers with a SecurityException.
+     *
+     * Binding with BIND_AUTO_CREATE still creates the service, so the UI can observe state
+     * and show "not connected" instead of dying. Once the user grants the permission,
+     * MainActivity calls startService() and the foreground promotion happens then.
      */
     fun bindService() {
         if (_isServiceBound.value || isBinding) return
         isBinding = true
-        FlipperBleService.startService(context)
+        if (hasBluetoothPermissions()) {
+            FlipperBleService.startService(context)
+        }
         Intent(context, FlipperBleService::class.java).also { intent ->
             context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
     }
+
+    private fun hasBluetoothPermissions(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) ==
+                PackageManager.PERMISSION_GRANTED
+        } else {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH) ==
+                PackageManager.PERMISSION_GRANTED
+        }
 
     /**
      * Unbind from the service

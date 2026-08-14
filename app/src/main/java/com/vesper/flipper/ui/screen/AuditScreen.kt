@@ -75,7 +75,7 @@ fun AuditScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -336,7 +336,7 @@ private fun CommandTimelineItemCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = GlassFill1
         )
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -403,7 +403,7 @@ private fun AuditEntryItem(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = GlassFill1
         )
     ) {
         Row(
@@ -495,7 +495,7 @@ private fun AuditDetailSheet(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = Color.Transparent
     ) {
         Column(
             modifier = Modifier

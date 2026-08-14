@@ -59,6 +59,11 @@ fun AlchemyLabScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(VesperBackdropBrush)
+            // This screen draws its own header instead of a Scaffold + TopAppBar, so
+            // nothing else applies the status-bar inset for it. The host NavHost no
+            // longer passes a top inset down (that was being applied twice on screens
+            // that DO have a TopAppBar), so the padding has to be claimed here.
+            .statusBarsPadding()
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -272,7 +277,7 @@ private fun TheForgeSection(
                     AssistChip(
                         onClick = { onInputChange(s) },
                         label = { Text(s, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall) },
-                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        colors = AssistChipDefaults.assistChipColors(containerColor = GlassFill1)
                     )
                 }
             }

@@ -61,6 +61,7 @@ import com.vesper.flipper.ble.ConnectionDiagnosticsReport
 import com.vesper.flipper.ble.ConnectionState
 import com.vesper.flipper.ble.FirmwareCompatibilityProfile
 import com.vesper.flipper.domain.model.FlipperRemoteButton
+import com.vesper.flipper.ui.theme.GlassFill1
 import com.vesper.flipper.ui.theme.VesperBackdropBrush
 import com.vesper.flipper.ui.viewmodel.DeviceViewModel
 import kotlinx.coroutines.Job
@@ -245,7 +246,7 @@ fun OpsCenterScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -337,7 +338,7 @@ private fun PipelineHealthCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)
+            containerColor = Color.Transparent.copy(alpha = 0.94f)
         )
     ) {
         Column(
@@ -426,7 +427,7 @@ private fun RunbooksCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)
+            containerColor = Color.Transparent.copy(alpha = 0.94f)
         )
     ) {
         Column(
@@ -447,7 +448,7 @@ private fun RunbooksCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                        containerColor = GlassFill1.copy(alpha = 0.55f)
                     )
                 ) {
                     Column(
@@ -506,7 +507,7 @@ private fun MacroRecorderCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)
+            containerColor = Color.Transparent.copy(alpha = 0.94f)
         )
     ) {
         Column(

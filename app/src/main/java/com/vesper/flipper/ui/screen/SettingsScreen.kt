@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vesper.flipper.data.SettingsStore
@@ -40,7 +41,7 @@ fun SettingsScreen(
                     Text("Settings", fontWeight = FontWeight.Bold)
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -407,7 +408,7 @@ fun SettingsScreen(
                         onCheckedChange = { viewModel.setTtsEnabled(it) }
                     )
                     Text(
-                        text = "Uses your OpenRouter API key — no extra key needed.",
+                        text = "Uses your OpenRouter API key вЂ” no extra key needed.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -424,7 +425,7 @@ fun SettingsScreen(
                         onExpandedChange = { voiceExpanded = it }
                     ) {
                         OutlinedTextField(
-                            value = currentVoice?.let { "${it.name} — ${it.description}" } ?: "Shimmer",
+                            value = currentVoice?.let { "${it.name} вЂ” ${it.description}" } ?: "Shimmer",
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Voice") },
@@ -531,7 +532,7 @@ fun SettingsScreen(
 
                         SettingsSwitch(
                             title = "Mute Glasses Mic",
-                            subtitle = "Pause listening — glasses won't hear audio until unmuted.",
+                            subtitle = "Pause listening вЂ” glasses won't hear audio until unmuted.",
                             checked = state.glassesMuted,
                             onCheckedChange = { viewModel.setGlassesMuted(it) }
                         )
@@ -602,7 +603,7 @@ private fun SettingsSection(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = GlassFill1
         )
     ) {
         Column(

@@ -75,7 +75,7 @@ fun SignalArsenalScreen(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = Color.Transparent
             )
         )
 
@@ -229,7 +229,7 @@ private fun SignalTypeTabs(
 ) {
     ScrollableTabRow(
         selectedTabIndex = SignalType.entries.indexOf(selectedType),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = Color.Transparent,
         contentColor = VesperOrange,
         edgePadding = 16.dp
     ) {
@@ -373,7 +373,7 @@ private fun SignalDetailPanel(
     Card(
         modifier = modifier.padding(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = Color.Transparent
         )
     ) {
         Column(
@@ -480,7 +480,7 @@ private fun SignalDetailPanel(
 private fun SignalDetails(signal: SignalCapture) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = GlassFill1.copy(alpha = 0.5f)
         )
     ) {
         Column(

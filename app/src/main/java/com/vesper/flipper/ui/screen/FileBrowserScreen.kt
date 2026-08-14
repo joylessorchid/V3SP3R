@@ -62,7 +62,7 @@ fun FileBrowserScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -220,7 +220,7 @@ private fun FilePreviewSheet(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = Color.Transparent
     ) {
         Column(
             modifier = Modifier
@@ -239,7 +239,7 @@ private fun FilePreviewSheet(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "${formatFileSize(file.size)} • ${file.path}",
+                        text = "${formatFileSize(file.size)} вЂў ${file.path}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

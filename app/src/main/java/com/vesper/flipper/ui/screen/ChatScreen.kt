@@ -41,8 +41,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.vesper.flipper.data.database.ChatSessionSummary
 import com.vesper.flipper.domain.model.*
+import androidx.compose.foundation.border
 import com.vesper.flipper.ui.components.ApprovalDialog
 import com.vesper.flipper.ui.components.DiffViewer
+import com.vesper.flipper.ui.components.GlassIconButton
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.ChatViewModel
 import com.vesper.flipper.voice.SpeechState
@@ -245,64 +247,50 @@ fun ChatScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = {
-                        if (conversationState.messages.isNotEmpty()) {
-                            showDeleteConfirmation = true
-                        }
-                    }) {
-                        Icon(
-                            Icons.Default.DeleteSweep,
-                            contentDescription = "Clear Chat",
-                            tint = if (conversationState.messages.isNotEmpty())
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                        )
-                    }
-                },
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        TextButton(onClick = { showHistoryDrawer = true }) {
-                            Icon(
-                                Icons.Default.History,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                "History",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
-                                letterSpacing = 1.sp
-                            )
-                        }
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onNavigateToAudit) {
-                        Icon(
-                            Icons.Default.Receipt,
-                            contentDescription = "Audit Log",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    IconButton(onClick = { viewModel.startNewSession() }) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = "New Chat",
-                            tint = VesperOrange
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+            // No title bar. A chat screen's content IS the identity, and a bar
+            // labelled "History" spent a full row of a phone screen saying nothing.
+            // Floating controls instead, over the backdrop.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                GlassIconButton(
+                    icon = Icons.Default.History,
+                    contentDescription = "History",
+                    onClick = { showHistoryDrawer = true }
                 )
-            )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Clearing the thread is destructive and unrecoverable, so it is
+                    // dimmed to unavailable when there is nothing to clear rather than
+                    // sitting live next to the buttons you actually press.
+                    GlassIconButton(
+                        icon = Icons.Default.DeleteSweep,
+                        contentDescription = "Clear chat",
+                        tint = if (conversationState.messages.isNotEmpty()) TextSecondary
+                        else TextTertiary.copy(alpha = 0.4f),
+                        onClick = {
+                            if (conversationState.messages.isNotEmpty()) {
+                                showDeleteConfirmation = true
+                            }
+                        }
+                    )
+                    GlassIconButton(
+                        icon = Icons.Default.Receipt,
+                        contentDescription = "Audit log",
+                        onClick = onNavigateToAudit
+                    )
+                    GlassIconButton(
+                        icon = Icons.Default.Add,
+                        contentDescription = "New chat",
+                        active = true,
+                        onClick = { viewModel.startNewSession() }
+                    )
+                }
+            }
         },
         bottomBar = {
             ChatInputBar(
@@ -412,7 +400,7 @@ private fun EmptyChat(onSuggestionClick: (String) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Barrel ring icon — matches logo aesthetic
+            // Barrel ring icon вЂ” matches logo aesthetic
             Box(
                 modifier = Modifier
                     .size(72.dp)
@@ -510,66 +498,55 @@ private fun ChatMessageItem(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
-        if (!isUser) {
-            if (isAssistant) {
-                // Vesper monogram avatar — wine circle with gold V
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(VesperWine, VesperWineDark)
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "V",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Light,
-                        fontFamily = FontFamily.Serif,
-                        color = VesperGold
-                    )
-                }
-            } else {
-                // Tool avatar
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Terminal,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+        // Only tool output keeps an avatar. The assistant's reply does not get one:
+        // there are exactly two speakers here, the user's line is already visually
+        // distinct, and a 32dp gutter down the left costs width on every line of
+        // every answer to disambiguate something that was never ambiguous.
+        if (isTool) {
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .background(GlassFill2),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Terminal,
+                    contentDescription = null,
+                    tint = VesperAqua,
+                    modifier = Modifier.size(16.dp)
+                )
             }
             Spacer(modifier = Modifier.width(8.dp))
         }
 
         Column(
-            modifier = Modifier.widthIn(max = 300.dp)
+            // The assistant runs the full width; the user's line is capped so the
+            // two are told apart by shape rather than by colour. The old code capped
+            // BOTH at 300dp, which on a large screen left every answer in a narrow
+            // ribbon with the rest of the display empty.
+            modifier = if (isUser) Modifier.widthIn(max = 300.dp) else Modifier.weight(1f, fill = false)
         ) {
             Surface(
                 shape = RoundedCornerShape(
-                    topStart = if (isUser) 16.dp else 4.dp,
-                    topEnd = if (isUser) 4.dp else 16.dp,
-                    bottomStart = 16.dp,
-                    bottomEnd = 16.dp
+                    topStart = if (isUser) 20.dp else 14.dp,
+                    topEnd = if (isUser) 6.dp else 14.dp,
+                    bottomStart = 20.dp,
+                    bottomEnd = 20.dp
                 ),
+                // Transparent for the assistant: a long technical answer reads as a
+                // document, not as a speech bubble.
                 color = when {
-                    isUser -> VesperOrange
-                    isTool -> MaterialTheme.colorScheme.secondaryContainer
-                    else -> MaterialTheme.colorScheme.surfaceVariant
+                    isUser -> ChatUser
+                    isTool -> ChatTool
+                    else -> Color.Transparent
                 }
             ) {
                 Column(
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier.padding(
+                        horizontal = if (isAssistant) 0.dp else 14.dp,
+                        vertical = if (isAssistant) 2.dp else 11.dp
+                    )
                 ) {
                     // Show image attachments if present
                     if (!message.imageAttachments.isNullOrEmpty()) {
@@ -603,8 +580,12 @@ private fun ChatMessageItem(
                     if (message.content.isNotEmpty()) {
                         Text(
                             text = message.content,
-                            color = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyMedium
+                            color = if (isTool) TextSecondary else TextPrimary,
+                            // The answer is the thing people actually read, so it gets
+                            // the paragraph setting (16sp/25sp) rather than the compact
+                            // one shared with chrome.
+                            style = if (isAssistant) MaterialTheme.typography.bodyLarge
+                            else MaterialTheme.typography.bodyMedium
                         )
                     }
 
@@ -934,9 +915,14 @@ private fun ChatInputBar(
     val isListening = voiceState is SpeechState.Listening
     val isProcessingVoice = voiceState is SpeechState.Processing
 
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 8.dp
+    // A floating composer rather than a docked slab. The old Surface spanned the
+    // full width with a tonal elevation, which drew a hard horizontal line across
+    // the bottom of every screen and cut the conversation off. Letting the backdrop
+    // run underneath keeps the thread feeling continuous.
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -979,7 +965,10 @@ private fun ChatInputBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(VesperSurface.copy(alpha = 0.9f))
+                    .border(1.dp, GlassStroke, RoundedCornerShape(28.dp))
+                    .padding(horizontal = 6.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Attachment button with menu
@@ -1259,7 +1248,7 @@ private fun ChatHistorySheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = Color.Transparent
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             Row(

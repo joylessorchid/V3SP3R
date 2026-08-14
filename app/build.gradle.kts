@@ -59,8 +59,13 @@ android {
             isMinifyEnabled = false
         }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // Minification is on by default. Turn it off for one build with
+            //   gradlew assembleRelease -PvesperMinify=false
+            // to tell an R8 problem (a missing keep rule shows up only at runtime)
+            // apart from a real bug, without editing this file.
+            val minify = (project.findProperty("vesperMinify") as String?)?.toBooleanStrictOrNull() ?: true
+            isMinifyEnabled = minify
+            isShrinkResources = minify
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
