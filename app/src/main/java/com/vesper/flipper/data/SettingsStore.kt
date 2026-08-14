@@ -335,11 +335,16 @@ class SettingsStore @Inject constructor(
         /** Entry name inside EncryptedSharedPreferences holding the OpenRouter key. */
         private const val SECURE_API_KEY = "openrouter_api_key"
 
-        // Cheap, fast, drives tools and accepts images — enough for a stream of short
-        // Flipper commands without a large API bill. The previous default,
-        // nousresearch/hermes-4-405b, no longer exists on OpenRouter, so a fresh install
-        // failed on its first request until the user opened Settings and picked something.
-        const val DEFAULT_MODEL = "google/gemini-3.7-flash"
+        // Chosen for what this app asks of a model rather than for price. The previous
+        // default here was google/gemini-3.7-flash, picked because it is cheap and fast
+        // — and it returned an empty response to "scan wifi networks", which is not an
+        // edge case for a Flipper Zero controller but the ordinary work. Google's models
+        // decline a large share of security tooling.
+        //
+        // A default that refuses the app's primary use case is not a default, whatever
+        // it costs per token. Gemini is still one tap away in Settings for anyone whose
+        // usage is mostly file browsing and IR remotes.
+        const val DEFAULT_MODEL = "anthropic/claude-sonnet-5"
         // Shimmer: soft, warm female — default TTS voice (OpenAI via OpenRouter)
         const val DEFAULT_TTS_VOICE = "shimmer"
         const val DEFAULT_AI_MAX_ITERATIONS = 10

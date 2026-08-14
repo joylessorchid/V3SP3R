@@ -52,49 +52,67 @@ class OpenRouterModelCatalog @Inject constructor() {
                 val data = root["data"]?.jsonArray
                     ?: return@withContext Result.failure(IOException("Invalid model catalog payload"))
 
-                val remoteModels = data.mapNotNull { element ->
+                // Only models that can call tools. This is not a preference — the app
+                // works by having the model invoke execute_command, so a model without
+                // tool support cannot do anything here and picking one produces a
+                // conversation where nothing ever happens. It was previously possible
+                // to select exactly that.
+                val usable = data.mapNotNull { element ->
                     val modelObj = element.jsonObject
                     val id = modelObj.string("id") ?: return@mapNotNull null
+
+                    val supportsTools = modelObj["supported_parameters"]?.let { params ->
+                        runCatching { params.jsonArray.any { it.jsonPrimitive.content == "tools" } }
+                            .getOrDefault(false)
+                    } ?: false
+                    if (!supportsTools) return@mapNotNull null
+
+                    // :free and :beta are rate-limited or unstable aliases of a model
+                    // that is already in the list under its real id.
+                    if (id.contains(":free", true) || id.contains(":beta", true) ||
+                        id.contains(":extended", true) || id.endsWith(":batch")
+                    ) return@mapNotNull null
+
+                    val supportsImages = modelObj["architecture"]?.jsonObject
+                        ?.get("input_modalities")?.let { mods ->
+                            runCatching { mods.jsonArray.any { it.jsonPrimitive.content == "image" } }
+                                .getOrDefault(false)
+                        } ?: false
+
                     RemoteModel(
                         id = id,
                         name = modelObj.string("name") ?: id.substringAfter("/"),
-                        created = modelObj.long("created") ?: 0L
+                        created = modelObj.long("created") ?: 0L,
+                        supportsImages = supportsImages
                     )
                 }
 
-                val selectedByProvider = MAJOR_MANUFACTURERS.mapNotNull { manufacturer ->
-                    val candidates = remoteModels.filter { providerFromId(it.id) == manufacturer.providerId }
-                    if (candidates.isEmpty()) return@mapNotNull null
-
-                    val stableCandidates = candidates.filterNot { model ->
-                        model.id.contains(":free", ignoreCase = true) ||
-                                model.id.contains(":beta", ignoreCase = true) ||
-                                model.id.contains(":preview", ignoreCase = true)
-                    }
-
-                    val latest = (if (stableCandidates.isNotEmpty()) stableCandidates else candidates)
-                        .maxByOrNull { it.created }
-                        ?: return@mapNotNull null
-
-                    ModelInfo(
-                        id = latest.id,
-                        displayName = latest.name,
-                        description = "Latest ${manufacturer.displayName}"
-                    )
-                }
-
-                if (selectedByProvider.isEmpty()) {
+                if (usable.isEmpty()) {
                     return@withContext Result.success(SettingsStore.FALLBACK_MODELS)
                 }
 
-                val selectedByProviderId = selectedByProvider.associateBy { providerFromId(it.id) }.toMutableMap()
-                SettingsStore.FALLBACK_MODELS.forEach { fallback ->
-                    selectedByProviderId.putIfAbsent(providerFromId(fallback.id), fallback)
-                }
+                // Known vendors first and in a deliberate order, everything else after,
+                // newest first within each. The old code kept ONE model per vendor —
+                // the most recently created — which is not the same as the best one: a
+                // vendor's newest release is often a small or experimental variant while
+                // its flagship, published a month earlier, never appeared at all. That
+                // is why the list was both short and full of odd choices.
+                val vendorRank = MAJOR_MANUFACTURERS.withIndex()
+                    .associate { (index, m) -> m.providerId to index }
 
-                val ordered = MAJOR_MANUFACTURERS.mapNotNull { manufacturer ->
-                    selectedByProviderId[manufacturer.providerId]
-                }
+                val ordered = usable
+                    .sortedWith(
+                        compareBy<RemoteModel> { vendorRank[providerFromId(it.id)] ?: Int.MAX_VALUE }
+                            .thenBy { providerFromId(it.id) }
+                            .thenByDescending { it.created }
+                    )
+                    .map { model ->
+                        ModelInfo(
+                            id = model.id,
+                            displayName = model.name,
+                            description = if (model.supportsImages) "Tools · images" else "Tools"
+                        )
+                    }
 
                 Result.success(ordered)
             }
@@ -127,7 +145,8 @@ class OpenRouterModelCatalog @Inject constructor() {
         private data class RemoteModel(
             val id: String,
             val name: String,
-            val created: Long
+            val created: Long,
+            val supportsImages: Boolean = false
         )
 
         // Provider prefixes as OpenRouter spells them in a model id, e.g. the "google"

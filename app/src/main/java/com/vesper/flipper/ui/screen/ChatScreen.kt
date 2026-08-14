@@ -247,7 +247,21 @@ fun ChatScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        // Themed explicitly. The default snackbar is Material's inverseSurface, which
+        // in a dark scheme is a near-white slab — it landed on this screen as a bright
+        // rectangle over the composer, the one element loud enough to look like a
+        // system alert rather than a message from the app.
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = VesperSurface,
+                    contentColor = TextPrimary,
+                    actionColor = VesperAccent,
+                    shape = RoundedCornerShape(16.dp)
+                )
+            }
+        },
         topBar = {
             // No title bar. A chat screen's content IS the identity, and a bar
             // labelled "History" spent a full row of a phone screen saying nothing.

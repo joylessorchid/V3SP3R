@@ -589,13 +589,29 @@ class OpenRouterClient @Inject constructor(
             // simply never answered — no reply, no error, no spinner, nothing to
             // retry. Silent is the worst failure mode an assistant can have.
             if (content.isBlank() && toolCalls.isNullOrEmpty()) {
-                val reason = if (!rawToolCalls.isNullOrEmpty()) {
-                    Log.e(TAG, "Model sent ${rawToolCalls.size} tool call(s), all malformed and dropped.")
-                    "${apiResponse.model} returned ${rawToolCalls.size} tool call(s) this app could not read. " +
-                        "Try the request again, or pick a different model in Settings."
-                } else {
-                    Log.e(TAG, "Model returned neither text nor tool calls.")
-                    "${apiResponse.model} returned an empty response. Try again, or pick a different model in Settings."
+                // finish_reason is the provider telling us WHY it stopped, and it was
+                // parsed but never read. Without it "empty response" is a dead end —
+                // with it the difference between a safety refusal, a truncation and a
+                // genuine blank is visible on the phone instead of only in logcat.
+                val finish = choice.finishReason
+                val reason = when {
+                    !rawToolCalls.isNullOrEmpty() -> {
+                        Log.e(TAG, "Model sent ${rawToolCalls.size} tool call(s), all malformed. finish_reason=$finish")
+                        "${apiResponse.model} returned ${rawToolCalls.size} tool call(s) this app could not read. " +
+                            "Try again, or pick a different model in Settings."
+                    }
+                    finish == "content_filter" || finish == "safety" || finish == "blocklist" ->
+                        "${apiResponse.model} refused this request (finish_reason: $finish). " +
+                            "Google's models decline a lot of security tooling; a different provider in Settings will usually answer it."
+                    finish == "length" ->
+                        "${apiResponse.model} hit its output limit before writing anything (finish_reason: length). " +
+                            "Shorten the conversation or lower AI Max Iterations in Settings."
+                    else -> {
+                        Log.e(TAG, "Model returned neither text nor tool calls. finish_reason=$finish")
+                        "${apiResponse.model} returned an empty response" +
+                            (finish?.let { " (finish_reason: $it)" } ?: "") +
+                            ". Try again, or pick a different model in Settings."
+                    }
                 }
                 return ChatCompletionResult.Error(reason)
             }
@@ -1459,12 +1475,16 @@ class OpenRouterClient @Inject constructor(
         // Every id here is checked against OpenRouter's live catalogue. The previous set
         // (hermes-4-405b, claude-sonnet-4.5, gpt-oss-120b, grok-4-fast, command-a) had
         // been withdrawn in full, so this chain caught nothing at all.
+        // Google is deliberately last rather than first. It answers fastest and costs
+        // least, but declines a large share of the requests this app exists to make, and
+        // a fallback chain that leads with a model likely to refuse is a chain that
+        // spends a round trip to get nowhere.
         private val TOOL_USE_FALLBACK_MODELS = listOf(
-            "google/gemini-3.7-flash",
             "anthropic/claude-sonnet-5",
             "openai/gpt-5.6-sol",
             "x-ai/grok-4.6",
-            "moonshotai/kimi-k3"
+            "moonshotai/kimi-k3",
+            "google/gemini-3.7-flash"
         )
 
         // Models that answer chat but cannot call tools, skipped before we waste a
