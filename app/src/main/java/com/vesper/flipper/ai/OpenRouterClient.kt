@@ -1440,25 +1440,35 @@ class OpenRouterClient @Inject constructor(
             "request_photo"
         )
 
+        // Tried in order when the selected model cannot drive tool calls. Deliberately
+        // spread across five vendors: the point is to survive one provider being down or
+        // one model being withdrawn, which same-vendor fallbacks do not do.
+        //
+        // Every id here is checked against OpenRouter's live catalogue. The previous set
+        // (hermes-4-405b, claude-sonnet-4.5, gpt-oss-120b, grok-4-fast, command-a) had
+        // been withdrawn in full, so this chain caught nothing at all.
         private val TOOL_USE_FALLBACK_MODELS = listOf(
-            "nousresearch/hermes-4-405b",
-            "anthropic/claude-sonnet-4.5",
-            "openai/gpt-oss-120b",
-            "x-ai/grok-4-fast",
-            "cohere/command-a"
+            "google/gemini-3.7-flash",
+            "anthropic/claude-sonnet-5",
+            "openai/gpt-5.6-sol",
+            "x-ai/grok-4.6",
+            "moonshotai/kimi-k3"
         )
 
-        private val KNOWN_NON_TOOL_MODELS = setOf(
-            "google/gemini-2.5-flash-image-preview"
-        )
+        // Models that answer chat but cannot call tools, skipped before we waste a
+        // request on them. Empty because every model now in the fallback chain and in
+        // SettingsStore.FALLBACK_MODELS advertises tool support in OpenRouter's catalogue.
+        // Add an id here only with evidence — a wrong entry silently removes a working
+        // model from the chain.
+        private val KNOWN_NON_TOOL_MODELS = emptySet<String>()
 
         // Fast, cheap vision models used to describe images before sending to the
         // primary tool model. Multiple candidates provide resilience against model
-        // deprecation or temporary outages on OpenRouter.
+        // deprecation or temporary outages on OpenRouter. All three accept image input.
         private val VISION_MODEL_CANDIDATES = listOf(
-            "google/gemini-2.0-flash-001",     // Free, fast, reliable — no thinking overhead
-            "google/gemini-2.5-flash",          // GA version (NOT "-preview" which was removed)
-            "openai/gpt-4o-mini"                // Reliable cross-provider fallback
+            "google/gemini-3.5-flash-lite",     // Cheapest of the three; enough to describe a photo
+            "google/gemini-3.7-flash",          // Same vendor, stronger, still fast
+            "openai/gpt-5.6-sol"                // Cross-provider fallback if Google is down
         )
         private val VISION_PREPROCESSING_MODEL = VISION_MODEL_CANDIDATES.first()
 

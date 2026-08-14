@@ -562,7 +562,7 @@ Additional instruction:
 
     companion object {
         private const val OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-        private const val DEFAULT_MODELS = "nousresearch/hermes-4-405b"
+        private const val DEFAULT_MODELS = "google/gemini-3.7-flash"
         private const val DEFAULT_PROMPT_SET = "core"
 
         private val AUTHORIZED_HINTS = listOf(

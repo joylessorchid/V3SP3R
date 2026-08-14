@@ -130,19 +130,24 @@ class OpenRouterModelCatalog @Inject constructor() {
             val created: Long
         )
 
+        // Provider prefixes as OpenRouter spells them in a model id, e.g. the "google"
+        // of "google/gemini-3.7-flash". A prefix that OpenRouter no longer serves is
+        // not merely inert: fetchLatestByManufacturer() fills the gap from
+        // SettingsStore.FALLBACK_MODELS, so a stale prefix puts a stale model into the
+        // live picker. Keep this aligned with FALLBACK_MODELS, same order.
+        //
+        // Dropped because OpenRouter no longer lists them: nousresearch, mistralai,
+        // cohere, z-ai. "meta-llama" became "meta".
         private val MAJOR_MANUFACTURERS = listOf(
-            Manufacturer("nousresearch", "Nous Research"),
+            Manufacturer("google", "Google"),
             Manufacturer("anthropic", "Anthropic"),
             Manufacturer("openai", "OpenAI"),
-            Manufacturer("google", "Google"),
-            Manufacturer("meta-llama", "Meta"),
-            Manufacturer("mistralai", "Mistral"),
             Manufacturer("x-ai", "xAI"),
             Manufacturer("qwen", "Qwen"),
             Manufacturer("deepseek", "DeepSeek"),
-            Manufacturer("cohere", "Cohere"),
             Manufacturer("moonshotai", "Moonshot"),
-            Manufacturer("z-ai", "Z.ai")
+            Manufacturer("meta", "Meta"),
+            Manufacturer("minimax", "MiniMax")
         )
     }
 }

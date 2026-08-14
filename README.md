@@ -112,17 +112,25 @@ Every action the AI takes is logged:
 
 ## Recommended AI Models
 
-Vesper works with any model on [OpenRouter](https://openrouter.ai). For the best experience:
+Vesper works with any model on [OpenRouter](https://openrouter.ai) that supports tool
+calling. **You do not have to pick from this table** — Settings fetches OpenRouter's live
+catalogue and offers the newest model from each major vendor, so the list in the app stays
+current on its own. The table is here to explain the trade-off.
 
 | Model | Why Use It | Speed | Cost |
 |-------|-----------|-------|------|
-| **`nousresearch/hermes-4`** | Outstanding tool-use — purpose-built for agentic workflows. Top pick for power users. | Fast | $$ |
-| **`anthropic/claude-opus-4.6`** | Most capable reasoning model. Exceptional at complex multi-step operations and signal analysis. | Medium | $$$$ |
-| **`anthropic/claude-sonnet-4`** | Best balance of speed, intelligence, and cost. Great default. | Fast | $$ |
-| **`anthropic/claude-haiku-4`** | Blazing fast for simple reads and quick commands. | Fastest | $ |
-| **`openai/gpt-4o`** | Strong general-purpose alternative. | Fast | $$ |
+| **`google/gemini-3.7-flash`** | The default. Cheap and fast, drives tools well, reads images. Handles the short-command workload this app generates. | Fastest | $ |
+| **`anthropic/claude-sonnet-5`** | Better on long multi-step operations and on getting Flipper file formats exactly right. | Fast | $$ |
+| **`anthropic/claude-opus-5`** | Strongest reasoning, for signal analysis and awkward multi-step work. | Medium | $$$$ |
+| **`openai/gpt-5.6-sol`** | Solid cross-vendor alternative; useful if Google or Anthropic is having a bad day. | Fast | $$ |
+| **`x-ai/grok-4.6`** | Another independent vendor in the fallback chain. | Fast | $$ |
 
-**Our recommendation:** Start with **Hermes 4** or **Claude Sonnet 4** for daily use. Reach for **Claude Opus 4.6** when you need deep reasoning.
+**Our recommendation:** leave it on **Gemini 3.7 Flash** for daily use and switch to
+**Claude Sonnet 5** or **Opus 5** when a job needs real reasoning.
+
+> Model ids change. Everything in this table was checked against OpenRouter's catalogue,
+> but the authoritative list is the one Settings loads from OpenRouter at runtime. If an id
+> here 404s, the app's own picker is right and this table is out of date.
 
 ---
 
@@ -329,7 +337,7 @@ V3SP3R/
 
 This means the AI model returned malformed JSON. Vesper includes automatic JSON repair, but some models are more reliable than others. Try:
 1. Tap **Retry** on the error message
-2. Switch to a recommended model (Hermes 4, Claude Sonnet 4)
+2. Switch to a recommended model (Gemini 3.7 Flash, Claude Sonnet 5)
 3. Simplify your request
 </details>
 

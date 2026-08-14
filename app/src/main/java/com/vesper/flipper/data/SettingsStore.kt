@@ -335,28 +335,36 @@ class SettingsStore @Inject constructor(
         /** Entry name inside EncryptedSharedPreferences holding the OpenRouter key. */
         private const val SECURE_API_KEY = "openrouter_api_key"
 
-        // Default to the largest Hermes 4 model on OpenRouter.
-        const val DEFAULT_MODEL = "nousresearch/hermes-4-405b"
+        // Cheap, fast, drives tools and accepts images — enough for a stream of short
+        // Flipper commands without a large API bill. The previous default,
+        // nousresearch/hermes-4-405b, no longer exists on OpenRouter, so a fresh install
+        // failed on its first request until the user opened Settings and picked something.
+        const val DEFAULT_MODEL = "google/gemini-3.7-flash"
         // Shimmer: soft, warm female — default TTS voice (OpenAI via OpenRouter)
         const val DEFAULT_TTS_VOICE = "shimmer"
         const val DEFAULT_AI_MAX_ITERATIONS = 10
         const val MIN_AI_MAX_ITERATIONS = 4
         const val MAX_AI_MAX_ITERATIONS = 20
 
-        // Used when fetching live catalog fails (offline/rate-limited).
+        // Used when fetching the live catalog fails (offline / rate-limited), and — via
+        // OpenRouterModelCatalog's putIfAbsent — to fill in any manufacturer the live
+        // catalog did not return. That second use is why stale entries here are not
+        // harmless: they get injected into the picker the user is choosing from.
+        //
+        // Keep this list one-per-manufacturer and in the same order as
+        // OpenRouterModelCatalog.MAJOR_MANUFACTURERS, and keep both aligned with what
+        // OpenRouter actually serves. Every id below was checked against the live
+        // catalogue; all twelve of the ids this replaces had been withdrawn.
         val FALLBACK_MODELS = listOf(
-            ModelInfo("nousresearch/hermes-4-405b", "Hermes 4 405B", "Largest Hermes 4"),
-            ModelInfo("anthropic/claude-sonnet-4.5", "Claude Sonnet 4.5", "Latest Anthropic"),
-            ModelInfo("openai/gpt-oss-120b", "GPT-OSS 120B", "Latest OpenAI"),
-            ModelInfo("google/gemini-2.5-flash-image-preview", "Gemini 2.5 Flash Image Preview", "Latest Google"),
-            ModelInfo("meta-llama/llama-3.3-8b-instruct", "Llama 3.3 8B Instruct", "Latest Meta"),
-            ModelInfo("mistralai/devstral-small", "Devstral Small", "Latest Mistral"),
-            ModelInfo("x-ai/grok-4-fast", "Grok 4 Fast", "Latest xAI"),
-            ModelInfo("qwen/qwen3-coder", "Qwen3 Coder", "Latest Qwen"),
-            ModelInfo("deepseek/deepseek-r1-0528", "DeepSeek R1 0528", "Latest DeepSeek"),
-            ModelInfo("cohere/command-a", "Command A", "Latest Cohere"),
-            ModelInfo("moonshotai/kimi-k2", "Kimi K2", "Latest Moonshot"),
-            ModelInfo("z-ai/glm-4.5", "GLM 4.5", "Latest Z.ai")
+            ModelInfo("google/gemini-3.7-flash", "Gemini 3.7 Flash", "Latest Google"),
+            ModelInfo("anthropic/claude-sonnet-5", "Claude Sonnet 5", "Latest Anthropic"),
+            ModelInfo("openai/gpt-5.6-sol", "GPT-5.6 Sol", "Latest OpenAI"),
+            ModelInfo("x-ai/grok-4.6", "Grok 4.6", "Latest xAI"),
+            ModelInfo("qwen/qwen3.8-max", "Qwen3.8 Max", "Latest Qwen"),
+            ModelInfo("deepseek/deepseek-v4-pro", "DeepSeek V4 Pro", "Latest DeepSeek"),
+            ModelInfo("moonshotai/kimi-k3", "Kimi K3", "Latest Moonshot"),
+            ModelInfo("meta/muse-spark-1.2", "Muse Spark 1.2", "Latest Meta"),
+            ModelInfo("minimax/minimax-m3", "MiniMax M3", "Latest MiniMax")
         )
 
         fun getModelDisplayName(
