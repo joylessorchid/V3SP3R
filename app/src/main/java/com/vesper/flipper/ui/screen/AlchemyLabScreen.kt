@@ -387,7 +387,7 @@ private fun BlueprintCard(
             Spacer(modifier = Modifier.height(12.dp))
             Card(
                 modifier = Modifier.fillMaxWidth().heightIn(max = 150.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF0A0E14)),
+                colors = CardDefaults.cardColors(containerColor = VesperBackgroundDeep),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Box(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(12.dp)) {

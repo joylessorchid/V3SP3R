@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.vesper.flipper.ui.theme.VesperTheme
+import com.vesper.flipper.ui.theme.*
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -128,14 +128,10 @@ fun WidgetConfigScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF0D0D0D),
-                        Color(0xFF1A1A2E)
-                    )
-                )
-            )
+            // Was a third private gradient. This screen is launched by the launcher
+            // when a widget is added, so it is often the first thing a user sees of
+            // the app; it has no business looking like a different product.
+            .background(VesperBackdropBrush)
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -158,7 +154,7 @@ fun WidgetConfigScreen(
                         onClick = { onSave(selectedSignals) },
                         enabled = selectedSignals.any { it != null }
                     ) {
-                        Text("Save", color = Color(0xFFFF6B00))
+                        Text("Save", color = VesperAccent)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -196,7 +192,7 @@ fun WidgetConfigScreen(
                 }
             }
 
-            Divider(color = Color(0xFF333333), modifier = Modifier.padding(vertical = 8.dp))
+            Divider(color = GlassStroke, modifier = Modifier.padding(vertical = 8.dp))
 
             // Signal List
             if (selectedSlot != null) {
@@ -218,7 +214,7 @@ fun WidgetConfigScreen(
                             Text(
                                 text = group.name,
                                 style = MaterialTheme.typography.labelLarge,
-                                color = Color(0xFFFF6B00),
+                                color = VesperAccent,
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
@@ -250,7 +246,7 @@ fun WidgetConfigScreen(
                             Icons.Default.TouchApp,
                             contentDescription = null,
                             modifier = Modifier.size(64.dp),
-                            tint = Color(0xFF444444)
+                            tint = TextTertiary
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
@@ -278,10 +274,10 @@ fun SignalSlot(
             .aspectRatio(1f)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Color(0xFF2A2A4E) else Color(0xFF1E1E2E)
+            containerColor = if (isSelected) GlassFill3 else GlassFill1
         ),
         border = if (isSelected) {
-            androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFFF6B00))
+            androidx.compose.foundation.BorderStroke(2.dp, VesperAccent)
         } else null,
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -325,13 +321,13 @@ fun SignalSlot(
                     Icon(
                         Icons.Default.Add,
                         contentDescription = "Add",
-                        tint = Color(0xFF555555),
+                        tint = TextTertiary,
                         modifier = Modifier.size(24.dp)
                     )
                     Text(
                         text = "Slot $slotNumber",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF555555)
+                        color = TextTertiary
                     )
                 }
             }
@@ -350,7 +346,7 @@ fun SignalItem(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Color(0xFF2A3A2E) else Color(0xFF1E1E2E)
+            containerColor = if (isSelected) VesperAqua.copy(alpha = 0.16f) else GlassFill1
         ),
         shape = RoundedCornerShape(8.dp)
     ) {
@@ -370,7 +366,7 @@ fun SignalItem(
                 Icon(
                     Icons.Default.Check,
                     contentDescription = "Selected",
-                    tint = Color(0xFF00C853),
+                    tint = RiskLow,
                     modifier = Modifier.size(20.dp)
                 )
             }

@@ -25,6 +25,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vesper.flipper.domain.model.*
+import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.SectionLabel
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.SignalArsenalViewModel
 
@@ -57,27 +59,33 @@ fun SignalArsenalScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Header
-        TopAppBar(
-            title = {
-                Column {
-                    Text("Signal Arsenal", fontWeight = FontWeight.Bold)
-                    Text(
-                        "${signals.size} captures",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            },
-            actions = {
-                IconButton(onClick = { viewModel.refresh() }) {
-                    Icon(Icons.Default.Refresh, "Refresh")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent
+        // Header. The capture count leads as an eyebrow because it is the one fact
+        // that changes and the one you came here to check.
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 14.dp, vertical = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                GlassIconButton(
+                    icon = Icons.Default.Refresh,
+                    contentDescription = "Refresh",
+                    onClick = { viewModel.refresh() }
+                )
+            }
+            Spacer(Modifier.height(6.dp))
+            SectionLabel(text = "${signals.size} captures")
+            Spacer(Modifier.height(2.dp))
+            Text(
+                "Signal Arsenal",
+                style = MaterialTheme.typography.headlineLarge,
+                color = TextPrimary
             )
-        )
+        }
 
         // Signal Type Tabs
         SignalTypeTabs(

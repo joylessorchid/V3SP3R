@@ -1,5 +1,6 @@
 package com.vesper.flipper.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -38,10 +39,12 @@ fun DiffViewer(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Diff content
+        // Diff content. This sits inside the approval dialog, which is opaque, so it
+        // lifts off that surface rather than off the app backdrop.
         Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.surface
+            shape = RoundedCornerShape(14.dp),
+            color = GlassFill1,
+            border = BorderStroke(1.dp, GlassStroke)
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -51,7 +54,7 @@ fun DiffViewer(
                 itemsIndexed(sideBySideLines) { index, line ->
                     DiffLineRow(line = line)
                     if (index < sideBySideLines.lastIndex) {
-                        Divider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        Divider(color = GlassStroke)
                     }
                 }
             }

@@ -32,6 +32,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.vesper.flipper.domain.model.*
+import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.SectionLabel
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.PayloadLabViewModel
 
@@ -65,27 +67,28 @@ fun PayloadLabScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text("Payload Lab", fontWeight = FontWeight.Bold)
-                        Text(
-                            "Generate BadUSB & Evil Portal",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            ) {
+                GlassIconButton(
+                    icon = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    onClick = onNavigateBack
                 )
-            )
+                Spacer(Modifier.height(10.dp))
+                SectionLabel(text = "BadUSB and Evil Portal")
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    "Payload Lab",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = TextPrimary
+                )
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
@@ -258,7 +261,7 @@ private fun BadUsbTab(viewModel: PayloadLabViewModel) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFF1E1E1E)
+                    color = GlassFill1
                 ) {
                     SelectionContainer {
                         Text(
@@ -268,7 +271,7 @@ private fun BadUsbTab(viewModel: PayloadLabViewModel) {
                                 .horizontalScroll(rememberScrollState()),
                             fontFamily = FontFamily.Monospace,
                             fontSize = 12.sp,
-                            color = Color(0xFF9CDCFE)
+                            color = VesperAccentSoft
                         )
                     }
                 }
@@ -510,7 +513,7 @@ private fun EvilPortalTab(viewModel: PayloadLabViewModel) {
                         .fillMaxWidth()
                         .heightIn(max = 300.dp),
                     shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFF1E1E1E)
+                    color = GlassFill1
                 ) {
                     SelectionContainer {
                         Text(
@@ -521,7 +524,7 @@ private fun EvilPortalTab(viewModel: PayloadLabViewModel) {
                                 .horizontalScroll(rememberScrollState()),
                             fontFamily = FontFamily.Monospace,
                             fontSize = 10.sp,
-                            color = Color(0xFFCE9178)
+                            color = RiskMedium
                         )
                     }
                 }

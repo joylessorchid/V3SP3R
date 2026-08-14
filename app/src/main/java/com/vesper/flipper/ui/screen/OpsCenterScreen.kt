@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -61,8 +63,9 @@ import com.vesper.flipper.ble.ConnectionDiagnosticsReport
 import com.vesper.flipper.ble.ConnectionState
 import com.vesper.flipper.ble.FirmwareCompatibilityProfile
 import com.vesper.flipper.domain.model.FlipperRemoteButton
-import com.vesper.flipper.ui.theme.GlassFill1
-import com.vesper.flipper.ui.theme.VesperBackdropBrush
+import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.SectionLabel
+import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.DeviceViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -227,28 +230,46 @@ fun OpsCenterScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
-            TopAppBar(
-                title = { Text("Ops Center", fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(
-                        onClick = { viewModel.runConnectionDiagnostics() },
-                        enabled = !isRunningDiagnostics
-                    ) {
-                        if (isRunningDiagnostics) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    if (isRunningDiagnostics) {
+                        Box(
+                            modifier = Modifier.size(40.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
                             CircularProgressIndicator(
-                                modifier = Modifier.width(18.dp),
+                                modifier = Modifier.size(18.dp),
+                                color = VesperAccent,
                                 strokeWidth = 2.dp
                             )
-                        } else {
-                            Icon(Icons.Default.Refresh, contentDescription = "Run diagnostics")
                         }
+                    } else {
+                        GlassIconButton(
+                            icon = Icons.Default.Refresh,
+                            contentDescription = "Run diagnostics",
+                            onClick = { viewModel.runConnectionDiagnostics() }
+                        )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+                }
+                Spacer(Modifier.height(6.dp))
+                SectionLabel(text = "Link diagnostics and replay")
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    "Ops Center",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = TextPrimary
                 )
-            )
+            }
         }
     ) { padding ->
         Box(
@@ -378,9 +399,9 @@ private fun PipelineHealthCard(
                         Text(
                             check.level.name,
                             color = when (check.level) {
-                                ConnectionCheckLevel.PASS -> Color(0xFF2E7D32)
-                                ConnectionCheckLevel.WARN -> Color(0xFFF57C00)
-                                ConnectionCheckLevel.FAIL -> Color(0xFFC62828)
+                                ConnectionCheckLevel.PASS -> RiskLow
+                                ConnectionCheckLevel.WARN -> RiskMedium
+                                ConnectionCheckLevel.FAIL -> RiskHigh
                                 ConnectionCheckLevel.SKIPPED -> MaterialTheme.colorScheme.onSurfaceVariant
                             }
                         )

@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vesper.flipper.data.db.*
+import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.DeviceTrackerViewModel
 import com.vesper.flipper.ui.viewmodel.DeviceSortOption
 import java.text.SimpleDateFormat
@@ -48,15 +49,10 @@ fun DeviceTrackerScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF0D0D0D),
-                        Color(0xFF1A1A2E),
-                        Color(0xFF0D0D0D)
-                    )
-                )
-            )
+            // Was a second privately-defined gradient. Shared backdrop, and the screen
+            // claims the status-bar inset itself since it carries no TopAppBar.
+            .background(VesperBackdropBrush)
+            .statusBarsPadding()
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -87,8 +83,8 @@ fun DeviceTrackerScreen(
                 },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFF333333),
-                    focusedBorderColor = Color(0xFF00BCD4)
+                    unfocusedBorderColor = GlassStroke,
+                    focusedBorderColor = VesperAccentSoft
                 ),
                 shape = RoundedCornerShape(12.dp)
             )
@@ -110,7 +106,7 @@ fun DeviceTrackerScreen(
                             { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
                         } else null,
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFF00BCD4),
+                            selectedContainerColor = VesperAccentSoft,
                             selectedLabelColor = Color.White
                         )
                     )
@@ -123,7 +119,7 @@ fun DeviceTrackerScreen(
                             onClick = { viewModel.selectType(type) },
                             label = { Text("${type.icon} ${type.displayName} ($count)") },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Color(0xFF00BCD4),
+                                selectedContainerColor = VesperAccentSoft,
                                 selectedLabelColor = Color.White
                             )
                         )
@@ -200,7 +196,7 @@ fun DeviceTrackerScreen(
                                     Icons.Default.DevicesOther,
                                     contentDescription = null,
                                     modifier = Modifier.size(64.dp),
-                                    tint = Color(0xFF444444)
+                                    tint = TextTertiary
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
@@ -211,7 +207,7 @@ fun DeviceTrackerScreen(
                                 Text(
                                     text = "Scan for BLE, Sub-GHz, or NFC devices",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFF666666)
+                                    color = TextTertiary
                                 )
                             }
                         }
@@ -253,7 +249,7 @@ private fun DeviceTrackerHeader(
             Text(
                 text = "$recentDevices active in last 24h",
                 style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF00BCD4)
+                color = VesperAccentSoft
             )
         }
 
@@ -264,7 +260,7 @@ private fun DeviceTrackerHeader(
             StatBadge(
                 value = totalDevices.toString(),
                 label = "Total",
-                color = Color(0xFF4CAF50)
+                color = RiskLow
             )
         }
     }
@@ -309,7 +305,7 @@ private fun TrackedDeviceCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1E1E2E)
+            containerColor = GlassFill1
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -364,7 +360,7 @@ private fun TrackedDeviceCard(
                             Icons.Default.Star,
                             contentDescription = "Favorite",
                             modifier = Modifier.size(16.dp),
-                            tint = Color(0xFFFFD700)
+                            tint = RiskMedium
                         )
                     }
                     if (device.threat != ThreatLevel.NONE) {
@@ -376,7 +372,7 @@ private fun TrackedDeviceCard(
                 Text(
                     text = device.identifier,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF888888),
+                    color = TextTertiary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -391,7 +387,7 @@ private fun TrackedDeviceCard(
                     Text(
                         text = "${device.category.icon} ${device.category.displayName}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF00BCD4)
+                        color = VesperAccentSoft
                     )
 
                     // Sighting count
@@ -424,7 +420,7 @@ private fun TrackedDeviceCard(
                 Icon(
                     if (device.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
                     contentDescription = "Toggle favorite",
-                    tint = if (device.isFavorite) Color(0xFFFFD700) else Color.Gray
+                    tint = if (device.isFavorite) RiskMedium else Color.Gray
                 )
             }
         }
@@ -462,7 +458,7 @@ private fun DeviceDetailSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1E1E2E)
+        containerColor = GlassFill1
     ) {
         LazyColumn(
             modifier = Modifier
@@ -545,7 +541,7 @@ private fun DeviceDetailSheet(
                 item {
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF2A2A3E)
+                            containerColor = GlassFill3
                         )
                     ) {
                         Column(
@@ -616,7 +612,7 @@ private fun DeviceDetailSheet(
                             Text(
                                 text = "${it} dBm",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF00BCD4)
+                                color = VesperAccentSoft
                             )
                         }
                     }
@@ -644,7 +640,7 @@ private fun DeviceDetailSheet(
                         onClick = { showDeleteConfirm = true },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color(0xFFFF5252)
+                            contentColor = RiskHigh
                         )
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null)
@@ -673,7 +669,7 @@ private fun DeviceDetailSheet(
                         showDeleteConfirm = false
                     }
                 ) {
-                    Text("Delete", color = Color(0xFFFF5252))
+                    Text("Delete", color = RiskHigh)
                 }
             },
             dismissButton = {
@@ -726,12 +722,12 @@ private fun InfoRow(label: String, value: String) {
 
 private fun getTypeColor(type: DeviceType): Color {
     return when (type) {
-        DeviceType.BLE -> Color(0xFF2196F3)
-        DeviceType.SUBGHZ -> Color(0xFFFF9800)
-        DeviceType.NFC -> Color(0xFF4CAF50)
-        DeviceType.RFID -> Color(0xFF9C27B0)
-        DeviceType.WIFI -> Color(0xFF00BCD4)
-        DeviceType.INFRARED -> Color(0xFFF44336)
-        DeviceType.IBUTTON -> Color(0xFF607D8B)
+        DeviceType.BLE -> VesperAccent
+        DeviceType.SUBGHZ -> RiskMedium
+        DeviceType.NFC -> RiskLow
+        DeviceType.RFID -> VesperAccentSoft
+        DeviceType.WIFI -> VesperAccentSoft
+        DeviceType.INFRARED -> RiskHigh
+        DeviceType.IBUTTON -> RiskBlocked
     }
 }

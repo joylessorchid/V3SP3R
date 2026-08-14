@@ -55,15 +55,11 @@ fun SpectralOracleScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF0D0D1A),
-                        Color(0xFF1A0D2E),
-                        Color(0xFF0D0D1A)
-                    )
-                )
-            )
+            // Was a private purple gradient defined inline. One screen inventing its
+            // own ground is exactly what makes an app look assembled rather than
+            // designed, so it uses the shared backdrop like everything else.
+            .background(VesperBackdropBrush)
+            .statusBarsPadding()
     ) {
         // Animated background effect
         OracleBackground(isAnalyzing = isAnalyzing)
@@ -210,10 +206,10 @@ private fun OracleBackground(isAnalyzing: Boolean) {
             drawCircle(
                 brush = Brush.sweepGradient(
                     colors = listOf(
-                        Color(0xFF6B00FF).copy(alpha = 0.3f),
-                        Color(0xFFFF6B00).copy(alpha = 0.2f),
-                        Color(0xFF00FFD1).copy(alpha = 0.3f),
-                        Color(0xFF6B00FF).copy(alpha = 0.3f)
+                        VesperAccent.copy(alpha = 0.3f),
+                        VesperAccent.copy(alpha = 0.2f),
+                        VesperAqua.copy(alpha = 0.3f),
+                        VesperAccent.copy(alpha = 0.3f)
                     ),
                     center = center
                 ),
@@ -243,7 +239,7 @@ private fun OracleHeader() {
             Text(
                 "AI Signal Intelligence",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF00FFD1)
+                color = VesperAqua
             )
         }
         Text("🔮", fontSize = 40.sp)
@@ -258,9 +254,9 @@ private fun SignalSelector(
     Card(
         onClick = onClick,
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1A1A2E).copy(alpha = 0.8f)
+            containerColor = VesperSurfaceVariant.copy(alpha = 0.8f)
         ),
-        border = BorderStroke(1.dp, Color(0xFF6B00FF).copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, VesperAccent.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
@@ -276,7 +272,7 @@ private fun SignalSelector(
                 Icon(
                     Icons.Default.Sensors,
                     contentDescription = null,
-                    tint = Color(0xFFFF6B00),
+                    tint = VesperAccent,
                     modifier = Modifier.size(32.dp)
                 )
                 Column {
@@ -289,7 +285,7 @@ private fun SignalSelector(
                         Text(
                             "${selectedSignal.protocol} @ ${formatFrequency(selectedSignal.frequency)}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF00FFD1)
+                            color = VesperAqua
                         )
                     }
                 }
@@ -315,11 +311,11 @@ private fun AnalysisTypeSelector(
 
             Surface(
                 onClick = { onTypeSelected(type) },
-                color = if (isSelected) Color(0xFF6B00FF) else Color(0xFF1A1A2E).copy(alpha = 0.8f),
+                color = if (isSelected) VesperAccent else VesperSurfaceVariant.copy(alpha = 0.8f),
                 shape = RoundedCornerShape(20.dp),
                 border = BorderStroke(
                     1.dp,
-                    if (isSelected) Color(0xFF6B00FF) else Color(0xFF6B00FF).copy(alpha = 0.3f)
+                    if (isSelected) VesperAccent else VesperAccent.copy(alpha = 0.3f)
                 )
             ) {
                 Row(
@@ -365,8 +361,8 @@ private fun OracleAnalyzeButton(
             .fillMaxWidth()
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF6B00FF),
-            disabledContainerColor = Color(0xFF1A1A2E)
+            containerColor = VesperAccent,
+            disabledContainerColor = VesperSurfaceVariant
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -435,10 +431,10 @@ private fun OracleLoadingAnimation(modifier: Modifier = Modifier) {
                 drawArc(
                     brush = Brush.sweepGradient(
                         colors = listOf(
-                            Color(0xFF6B00FF),
-                            Color(0xFFFF6B00),
-                            Color(0xFF00FFD1),
-                            Color(0xFF6B00FF)
+                            VesperAccent,
+                            VesperAccent,
+                            VesperAqua,
+                            VesperAccent
                         )
                     ),
                     startAngle = 0f,
@@ -460,7 +456,7 @@ private fun OracleLoadingAnimation(modifier: Modifier = Modifier) {
         Text(
             "The Oracle is analyzing...",
             style = MaterialTheme.typography.titleMedium,
-            color = Color(0xFF00FFD1),
+            color = VesperAqua,
             fontWeight = FontWeight.Medium
         )
 
@@ -564,7 +560,7 @@ private fun AnalysisResultView(
                         Row(modifier = Modifier.padding(vertical = 4.dp)) {
                             Text(
                                 "${index + 1}.",
-                                color = Color(0xFF00FFD1),
+                                color = VesperAqua,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.width(24.dp)
                             )
@@ -585,9 +581,9 @@ private fun AnalysisResultView(
                 onClick = onShowRaw,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color(0xFF6B00FF)
+                    contentColor = VesperAccent
                 ),
-                border = BorderStroke(1.dp, Color(0xFF6B00FF).copy(alpha = 0.5f))
+                border = BorderStroke(1.dp, VesperAccent.copy(alpha = 0.5f))
             ) {
                 Icon(Icons.Default.Code, null)
                 Spacer(modifier = Modifier.width(8.dp))
@@ -693,16 +689,16 @@ private fun ResultSection(
 ) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1A1A2E).copy(alpha = 0.8f)
+            containerColor = VesperSurfaceVariant.copy(alpha = 0.8f)
         ),
-        border = BorderStroke(1.dp, Color(0xFF6B00FF).copy(alpha = 0.3f))
+        border = BorderStroke(1.dp, VesperAccent.copy(alpha = 0.3f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF00FFD1)
+                color = VesperAqua
             )
             Spacer(modifier = Modifier.height(12.dp))
             content()
@@ -756,9 +752,9 @@ private fun VulnerabilityItem(vuln: VulnItem) {
 @Composable
 private fun ExploitItem(exploit: ExploitItem) {
     Surface(
-        color = Color(0xFFFF6B00).copy(alpha = 0.1f),
+        color = VesperAccent.copy(alpha = 0.1f),
         shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(1.dp, Color(0xFFFF6B00).copy(alpha = 0.3f))
+        border = BorderStroke(1.dp, VesperAccent.copy(alpha = 0.3f))
     ) {
         Column(
             modifier = Modifier
@@ -773,7 +769,7 @@ private fun ExploitItem(exploit: ExploitItem) {
                 Text(
                     exploit.name,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFFF6B00)
+                    color = VesperAccent
                 )
                 Surface(
                     color = Color.White.copy(alpha = 0.1f),
@@ -809,7 +805,7 @@ private fun SignalPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1A1A2E),
+        containerColor = VesperSurfaceVariant,
         title = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -818,7 +814,7 @@ private fun SignalPickerDialog(
             ) {
                 Text("Select Signal", color = Color.White)
                 IconButton(onClick = onRefresh) {
-                    Icon(Icons.Default.Refresh, null, tint = Color(0xFF00FFD1))
+                    Icon(Icons.Default.Refresh, null, tint = VesperAqua)
                 }
             }
         },
@@ -853,12 +849,12 @@ private fun SignalPickerDialog(
                             onClick = { onSelect(signal) },
                             colors = CardDefaults.cardColors(
                                 containerColor = if (isSelected)
-                                    Color(0xFF6B00FF).copy(alpha = 0.3f)
+                                    VesperAccent.copy(alpha = 0.3f)
                                 else
                                     Color.White.copy(alpha = 0.05f)
                             ),
                             border = if (isSelected)
-                                BorderStroke(1.dp, Color(0xFF6B00FF))
+                                BorderStroke(1.dp, VesperAccent)
                             else null
                         ) {
                             Row(
@@ -878,7 +874,7 @@ private fun SignalPickerDialog(
                                         Text(
                                             "${signal.protocol} @ ${formatFrequency(signal.frequency)}",
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = Color(0xFF00FFD1)
+                                            color = VesperAqua
                                         )
                                     }
                                 }
@@ -886,7 +882,7 @@ private fun SignalPickerDialog(
                                     Icon(
                                         Icons.Default.CheckCircle,
                                         null,
-                                        tint = Color(0xFF6B00FF)
+                                        tint = VesperAccent
                                     )
                                 }
                             }
@@ -897,7 +893,7 @@ private fun SignalPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Done", color = Color(0xFF6B00FF))
+                Text("Done", color = VesperAccent)
             }
         }
     )
@@ -910,7 +906,7 @@ private fun RawResponseDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1A1A2E),
+        containerColor = VesperSurfaceVariant,
         title = { Text("Raw AI Response", color = Color.White) },
         text = {
             Box(
@@ -927,13 +923,13 @@ private fun RawResponseDialog(
                         .padding(12.dp),
                     fontFamily = FontFamily.Monospace,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF00FFD1)
+                    color = VesperAqua
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close", color = Color(0xFF6B00FF))
+                Text("Close", color = VesperAccent)
             }
         }
     )

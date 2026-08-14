@@ -1,6 +1,7 @@
 package com.vesper.flipper.ui.components
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -62,11 +63,25 @@ fun ApprovalDialog(
             dismissOnClickOutside = false
         )
     ) {
+        // Deliberately opaque while the rest of the app is glass. This dialog is the
+        // only thing standing between the model and a BadUSB run or a recursive
+        // delete, so it must be the most legible surface in the app, not the most
+        // atmospheric. The border is tinted by risk so the severity registers before
+        // any text is read.
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 8.dp
+            shape = RoundedCornerShape(28.dp),
+            color = VesperSurface,
+            border = BorderStroke(
+                width = if (isHighRisk) 1.5.dp else 1.dp,
+                color = when (approval.riskAssessment.level) {
+                    RiskLevel.LOW -> RiskLow.copy(alpha = 0.4f)
+                    RiskLevel.MEDIUM -> RiskMedium.copy(alpha = 0.5f)
+                    RiskLevel.HIGH -> RiskHigh.copy(alpha = 0.7f)
+                    RiskLevel.BLOCKED -> RiskBlocked.copy(alpha = 0.5f)
+                }
+            ),
+            tonalElevation = 0.dp
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
