@@ -4,9 +4,14 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.vesper.flipper.security.EncryptedStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,17 +22,43 @@ class SettingsStore @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    // OpenRouter API Key
-    private val API_KEY = stringPreferencesKey("openrouter_api_key")
+    // OpenRouter API Key.
+    //
+    // The key is held in EncryptedSharedPreferences (AES-256-GCM under a Keystore
+    // master key), NOT in the DataStore alongside ordinary settings — DataStore
+    // writes plaintext protobuf, so a key stored there is readable by anyone with
+    // file-level access to the device (root, forensic extraction, an unlocked
+    // bootloader). Everything else in this class is non-sensitive and stays put.
+    //
+    // LEGACY_API_KEY is the old plaintext location. It is read once, copied into
+    // encrypted storage and then removed, so an existing install stops leaving the
+    // key in the clear rather than merely storing a second copy correctly.
+    private val LEGACY_API_KEY = stringPreferencesKey("openrouter_api_key")
 
-    val apiKey: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[API_KEY]
+    private val encryptedStorage by lazy { EncryptedStorage(context) }
+
+    /** Bumped on every write so collectors of [apiKey] re-read. */
+    private val apiKeyRevision = MutableStateFlow(0)
+
+    val apiKey: Flow<String?> = apiKeyRevision.map { readApiKey() }
+
+    private suspend fun readApiKey(): String? = withContext(Dispatchers.IO) {
+        val legacy = context.dataStore.data.first()[LEGACY_API_KEY]
+        if (!legacy.isNullOrBlank()) {
+            encryptedStorage.putString(SECURE_API_KEY, legacy)
+            context.dataStore.edit { it.remove(LEGACY_API_KEY) }
+            return@withContext legacy
+        }
+        encryptedStorage.getString(SECURE_API_KEY)
     }
 
     suspend fun setApiKey(key: String) {
-        context.dataStore.edit { preferences ->
-            preferences[API_KEY] = key
+        withContext(Dispatchers.IO) {
+            encryptedStorage.putString(SECURE_API_KEY, key)
+            // Drop any stale plaintext copy left by an older build.
+            context.dataStore.edit { it.remove(LEGACY_API_KEY) }
         }
+        apiKeyRevision.value += 1
     }
 
     // Selected Model
@@ -301,6 +332,9 @@ class SettingsStore @Inject constructor(
     }
 
     companion object {
+        /** Entry name inside EncryptedSharedPreferences holding the OpenRouter key. */
+        private const val SECURE_API_KEY = "openrouter_api_key"
+
         // Default to the largest Hermes 4 model on OpenRouter.
         const val DEFAULT_MODEL = "nousresearch/hermes-4-405b"
         // Shimmer: soft, warm female — default TTS voice (OpenAI via OpenRouter)

@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Allow cleartext (ws://) for local development bridges.
-         Production bridges should always use wss:// (TLS). -->
-    <base-config cleartextTrafficPermitted="true">
+    <!-- Cleartext is refused everywhere by default. Every remote endpoint this app
+         talks to (OpenRouter, GitHub, lab.flipper.net) is https, so nothing legitimate
+         needs plain HTTP over the network. -->
+    <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>
     </base-config>
+
+    <!-- Exception: a development bridge running on this device or on the local
+         emulator host. Scoped to loopback only, so a ws:// bridge URL still works
+         while an attacker on the same Wi-Fi cannot be reached in cleartext.
+         A bridge on another machine must use wss://. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
 </network-security-config>

@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
+    <!-- vesper_secure_prefs.xml is the EncryptedSharedPreferences file holding the
+         OpenRouter key; it is excluded from both paths. The rule this replaces named
+         api_key_prefs.xml, which this app has never written — so it excluded nothing. -->
     <cloud-backup>
         <include domain="sharedpref" path="."/>
-        <exclude domain="sharedpref" path="api_key_prefs.xml"/>
+        <exclude domain="sharedpref" path="vesper_secure_prefs.xml"/>
     </cloud-backup>
     <device-transfer>
         <include domain="sharedpref" path="."/>
-        <exclude domain="sharedpref" path="api_key_prefs.xml"/>
+        <exclude domain="sharedpref" path="vesper_secure_prefs.xml"/>
     </device-transfer>
 </data-extraction-rules>

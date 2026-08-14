@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
     <include domain="sharedpref" path="."/>
-    <exclude domain="sharedpref" path="api_key_prefs.xml"/>
+    <!-- EncryptedSharedPreferences file holding the OpenRouter key. Its master key
+         lives in the hardware Keystore and never leaves the device, so a backed-up
+         copy could not be decrypted anywhere else — but the ciphertext has no
+         business leaving the phone either. The previous rule named api_key_prefs.xml,
+         a file this app has never written, so it excluded nothing. -->
+    <exclude domain="sharedpref" path="vesper_secure_prefs.xml"/>
 </full-backup-content>
