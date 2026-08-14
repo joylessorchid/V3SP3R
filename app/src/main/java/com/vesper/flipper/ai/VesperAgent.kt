@@ -366,6 +366,22 @@ class VesperAgent @Inject constructor(
                     )
 
                     if (result.toolCalls.isNullOrEmpty()) {
+                        // Second guard against the silent stall. The provider layer now
+                        // refuses to report an empty reply as a success, but this branch
+                        // is the one that puts a message on screen, so it checks too:
+                        // appending a blank assistant message ends the turn with nothing
+                        // rendered and nothing to retry, which is indistinguishable from
+                        // the app having ignored the request.
+                        if (result.content.isBlank()) {
+                            _conversationState.value = _conversationState.value.copy(
+                                messages = currentMessages,
+                                isLoading = false,
+                                progress = null,
+                                error = "${result.model} returned an empty answer. Try again, or pick a different model in Settings."
+                            )
+                            return _conversationState.value
+                        }
+
                         // No tool calls - final response
                         val assistantMessage = ChatMessage(
                             role = MessageRole.ASSISTANT,

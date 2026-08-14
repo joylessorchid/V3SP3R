@@ -582,10 +582,22 @@ class OpenRouterClient @Inject constructor(
                 }
             }?.take(MAX_TOOL_CALLS_PER_RESPONSE)
 
-            // Warn if model sent tool calls but all were malformed
-            if (!rawToolCalls.isNullOrEmpty() && toolCalls.isNullOrEmpty()) {
-                Log.e(TAG, "Model sent ${rawToolCalls.size} tool call(s) but ALL were malformed and dropped. " +
-                    "This likely means the response was not parsed correctly.")
+            // A response with no usable tool calls AND no text is not a success. This
+            // used to be logged and then returned as Success(content = ""), which the
+            // agent took for a final answer: it appended an empty assistant message,
+            // cleared the spinner and stopped. On screen that is a question that was
+            // simply never answered — no reply, no error, no spinner, nothing to
+            // retry. Silent is the worst failure mode an assistant can have.
+            if (content.isBlank() && toolCalls.isNullOrEmpty()) {
+                val reason = if (!rawToolCalls.isNullOrEmpty()) {
+                    Log.e(TAG, "Model sent ${rawToolCalls.size} tool call(s), all malformed and dropped.")
+                    "${apiResponse.model} returned ${rawToolCalls.size} tool call(s) this app could not read. " +
+                        "Try the request again, or pick a different model in Settings."
+                } else {
+                    Log.e(TAG, "Model returned neither text nor tool calls.")
+                    "${apiResponse.model} returned an empty response. Try again, or pick a different model in Settings."
+                }
+                return ChatCompletionResult.Error(reason)
             }
 
             ChatCompletionResult.Success(
