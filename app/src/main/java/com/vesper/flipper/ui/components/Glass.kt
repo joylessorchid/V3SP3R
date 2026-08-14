@@ -164,11 +164,15 @@ fun GlassIconButton(
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
 
+    // No resting fill. A row of filled circles across the top of every screen reads
+    // as five competing buttons; the glyphs alone read as tools, and the touch
+    // target is unchanged because the Box keeps its size. The disc appears only
+    // while a finger is down, where it confirms the press.
     Box(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .background(if (pressed) GlassFill3 else GlassFill2)
+            .background(if (pressed) GlassFill2 else Color.Transparent)
             .clickable(
                 interactionSource = interaction,
                 indication = null,
