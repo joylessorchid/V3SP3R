@@ -45,6 +45,7 @@ import androidx.compose.foundation.border
 import com.vesper.flipper.ui.components.ApprovalDialog
 import com.vesper.flipper.ui.components.DiffViewer
 import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.LocalOpenDrawer
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.ChatViewModel
 import com.vesper.flipper.voice.SpeechState
@@ -258,12 +259,18 @@ fun ChatScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val openDrawer = LocalOpenDrawer.current
                 GlassIconButton(
-                    icon = Icons.Default.History,
-                    contentDescription = "History",
-                    onClick = { showHistoryDrawer = true }
+                    icon = Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    onClick = openDrawer
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    GlassIconButton(
+                        icon = Icons.Default.History,
+                        contentDescription = "Chat history",
+                        onClick = { showHistoryDrawer = true }
+                    )
                     // Clearing the thread is destructive and unrecoverable, so it is
                     // dimmed to unavailable when there is nothing to clear rather than
                     // sitting live next to the buttons you actually press.

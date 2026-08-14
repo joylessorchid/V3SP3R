@@ -35,6 +35,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.vesper.flipper.ble.FlipperBleService
 import com.vesper.flipper.data.SettingsStore
+import com.vesper.flipper.ui.components.AppDrawerContent
+import com.vesper.flipper.ui.components.DrawerItem
+import com.vesper.flipper.ui.components.DrawerSection
+import com.vesper.flipper.ui.components.LocalOpenDrawer
 import com.vesper.flipper.ui.screen.*
 import com.vesper.flipper.ui.theme.GlassStroke
 import com.vesper.flipper.ui.theme.TextTertiary
@@ -43,6 +47,7 @@ import com.vesper.flipper.ui.theme.VesperBackdropBrush
 import com.vesper.flipper.ui.theme.VesperSurface
 import com.vesper.flipper.ui.theme.VesperTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -154,7 +159,51 @@ val screens = listOf(
 @Composable
 fun VesperApp() {
     val navController = rememberNavController()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    fun go(screen: Screen) {
+        scope.launch { drawerState.close() }
+        if (currentRoute == screen.route) return
+        navController.navigate(screen.route) {
+            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    // Navigation moved out of a bottom bar and into a drawer. A bar holds four
+    // items before labels truncate and this app has ten destinations — five of
+    // which could not be reached at all because they did not fit. On the chat
+    // screen the bar also sat directly under the composer, stacking two pieces of
+    // chrome at the bottom of the screen competing for the same thumb.
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            AppDrawerContent {
+                DrawerItem("Chat", Icons.Filled.Chat, currentRoute == Screen.Chat.route) { go(Screen.Chat) }
+                DrawerItem("Device", Icons.Filled.Bluetooth, currentRoute == Screen.Device.route) { go(Screen.Device) }
+                DrawerItem("Files", Icons.Filled.Folder, currentRoute == Screen.Files.route) { go(Screen.Files) }
+
+                DrawerSection("Build")
+                DrawerItem("Alchemy Lab", Icons.Filled.AutoAwesome, currentRoute == Screen.Alchemy.route) { go(Screen.Alchemy) }
+                DrawerItem("Payload Lab", Icons.Filled.Code, currentRoute == Screen.PayloadLab.route) { go(Screen.PayloadLab) }
+                DrawerItem("Signal Arsenal", Icons.Filled.Sensors, currentRoute == Screen.Arsenal.route) { go(Screen.Arsenal) }
+                DrawerItem("Spectral Oracle", Icons.Filled.Visibility, currentRoute == Screen.Oracle.route) { go(Screen.Oracle) }
+
+                DrawerSection("Diagnostics")
+                DrawerItem("Ops Center", Icons.Filled.BluetoothSearching, currentRoute == Screen.OpsCenter.route) { go(Screen.OpsCenter) }
+                DrawerItem("Audit log", Icons.Filled.Receipt, currentRoute == Screen.Audit.route) { go(Screen.Audit) }
+
+                DrawerSection("App")
+                DrawerItem("Settings", Icons.Filled.Settings, currentRoute == Screen.Settings.route) { go(Screen.Settings) }
+            }
+        }
+    ) {
+    CompositionLocalProvider(LocalOpenDrawer provides { scope.launch { drawerState.open() } }) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -168,68 +217,7 @@ fun VesperApp() {
             // AlchemyLab is the one reachable destination that draws its own header with
             // no TopAppBar; it applies statusBarsPadding() at its own root instead. Any
             // new screen without a TopAppBar must do the same.
-            contentWindowInsets = WindowInsets(0, 0, 0, 0),
-            bottomBar = {
-                // A floating glass pill rather than a full-width bar. The bar is a
-                // slab across the bottom of every screen; the pill leaves the gradient
-                // backdrop visible around it, which is what makes the app read as
-                // layered rather than as stacked panels.
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(28.dp))
-                            .background(VesperSurface.copy(alpha = 0.86f))
-                            .border(1.dp, GlassStroke, RoundedCornerShape(28.dp))
-                            .padding(horizontal = 8.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                    val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val currentDestination = navBackStackEntry?.destination
-
-                    // Map sub-screens to their parent bottom-nav tab
-                    val subScreenParents = mapOf(
-                        Screen.Audit.route to Screen.Chat.route,
-                        Screen.Files.route to Screen.Device.route
-                    )
-                    val currentRoute = currentDestination?.route
-                    val effectiveRoute = subScreenParents[currentRoute] ?: currentRoute
-
-                    screens.forEach { screen ->
-                        val selected = if (screen.route == effectiveRoute) {
-                            true
-                        } else {
-                            currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                        }
-
-                        NavPill(
-                            screen = screen,
-                            selected = selected,
-                            onClick = {
-                                val activeRoute = navController.currentBackStackEntry?.destination?.route
-                                // If already on this tab, do nothing
-                                if (activeRoute == screen.route) return@NavPill
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    // Only restore state when switching between bottom-nav tabs,
-                                    // not when returning from sub-screens (Files, Audit)
-                                    restoreState = activeRoute in screens.map { it.route }
-                                }
-                            }
-                        )
-                    }
-                    }
-                }
-            }
+            contentWindowInsets = WindowInsets(0, 0, 0, 0)
         ) { innerPadding ->
             NavHost(
                 navController = navController,
@@ -267,8 +255,19 @@ fun VesperApp() {
                 composable(Screen.Settings.route) {
                     SettingsScreen()
                 }
+                composable(Screen.PayloadLab.route) {
+                    PayloadLabScreen(onNavigateBack = { navController.popBackStack() })
+                }
+                composable(Screen.Arsenal.route) {
+                    SignalArsenalScreen()
+                }
+                composable(Screen.Oracle.route) {
+                    SpectralOracleScreen()
+                }
             }
         }
+    }
+    }
     }
 }
 

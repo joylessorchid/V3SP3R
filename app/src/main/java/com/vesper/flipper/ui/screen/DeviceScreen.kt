@@ -35,6 +35,7 @@ import com.vesper.flipper.domain.model.FlipperRemoteButton
 import com.vesper.flipper.glasses.BridgeState
 import com.vesper.flipper.ui.components.GlassIconButton
 import com.vesper.flipper.ui.components.ListDivider
+import com.vesper.flipper.ui.components.LocalOpenDrawer
 import com.vesper.flipper.ui.components.ListGroup
 import com.vesper.flipper.ui.components.ListRow
 import com.vesper.flipper.ui.components.SectionLabel
@@ -79,9 +80,14 @@ fun DeviceScreen(
                     .fillMaxWidth()
                     .statusBarsPadding()
                     .padding(horizontal = 14.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.End,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                GlassIconButton(
+                    icon = Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    onClick = LocalOpenDrawer.current
+                )
                 if (connectionState is ConnectionState.Connected) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         GlassIconButton(
