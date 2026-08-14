@@ -39,14 +39,19 @@ class MainActivity : ComponentActivity() {
 
     @Inject lateinit var settingsStore: SettingsStore
 
-    private val requiredPermissions = buildList {
+    /**
+     * Without these the BLE service cannot scan or connect, so it is not started.
+     *
+     * ACCESS_FINE_LOCATION is essential only below Android 12, where the platform
+     * refused a BLE scan without it. From Android 12 the neverForLocation flag on
+     * BLUETOOTH_SCAN replaces that requirement, and FlipperBleService.hasBluetoothPermissions()
+     * already checks only BLUETOOTH_SCAN and BLUETOOTH_CONNECT — so asking for location
+     * on a modern phone gated the app on something it does not use.
+     */
+    private val essentialPermissions = buildList {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             add(Manifest.permission.BLUETOOTH_SCAN)
             add(Manifest.permission.BLUETOOTH_CONNECT)
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                add(Manifest.permission.POST_NOTIFICATIONS)
-            }
         } else {
             add(Manifest.permission.BLUETOOTH)
             add(Manifest.permission.BLUETOOTH_ADMIN)
@@ -54,11 +59,24 @@ class MainActivity : ComponentActivity() {
         }
     }.toTypedArray()
 
+    /**
+     * Asked for, but denying them must not stop the Flipper connection. A foreground
+     * service still runs with POST_NOTIFICATIONS denied; the user simply does not see
+     * its notification.
+     */
+    private val optionalPermissions = buildList {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }.toTypedArray()
+
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.values.all { it }
-        if (allGranted) {
+    ) {
+        // Start on the essential set alone. The previous version required every
+        // requested permission, so one declined optional prompt left the app with no
+        // Bluetooth for the rest of its life.
+        if (hasEssentialPermissions()) {
             startBleService()
         }
     }
@@ -76,8 +94,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun hasEssentialPermissions(): Boolean = essentialPermissions.all {
+        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+    }
+
     private fun checkAndRequestPermissions() {
-        val missingPermissions = requiredPermissions.filter {
+        val missingPermissions = (essentialPermissions + optionalPermissions).filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
 

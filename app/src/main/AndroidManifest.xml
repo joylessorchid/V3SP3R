@@ -8,8 +8,15 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Location is capped at API 30. Before Android 12 the platform refused a BLE scan
+         without it, so it is genuinely required there. From Android 12 the
+         neverForLocation flag on BLUETOOTH_SCAN above is the contract that replaces it:
+         we assert we do not derive location from BLE results, and the platform stops
+         demanding the permission. Capping it means the app cannot even ask for location
+         on a modern phone — it does not appear in the app's permission list at all. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="30" />
 
     <!-- Network for OpenRouter -->
     <uses-permission android:name="android.permission.INTERNET" />
