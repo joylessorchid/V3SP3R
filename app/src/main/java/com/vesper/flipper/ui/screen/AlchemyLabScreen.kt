@@ -277,7 +277,10 @@ private fun TheForgeSection(
                     AssistChip(
                         onClick = { onInputChange(s) },
                         label = { Text(s, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall) },
-                        colors = AssistChipDefaults.assistChipColors(containerColor = GlassFill1)
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = GlassFill1,
+                            labelColor = TextPrimary
+                        )
                     )
                 }
             }

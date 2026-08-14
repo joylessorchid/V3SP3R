@@ -1330,7 +1330,12 @@ class FlipperProtocol @Inject constructor() {
         private const val RPC_REMOTE_IMMEDIATE_WRITE_ATTEMPTS = 2
         private const val RPC_REMOTE_IMMEDIATE_RETRY_DELAY_MS = 12L
         private const val RPC_REMOTE_BOOTSTRAP_DELAY_MS = 90L
-        private const val RPC_REMOTE_BOOTSTRAP_LOCK_TIMEOUT_MS = 450L
+        // 450 ms was under two round trips on a link the autotuner measures at ~270 ms
+        // average, so a pipeline that happened to be busy — which the diagnostics screen
+        // reports as an ordinary condition, not a fault — swallowed the press instead of
+        // queueing behind it. A button that silently does nothing is worse than one that
+        // takes a second.
+        private const val RPC_REMOTE_BOOTSTRAP_LOCK_TIMEOUT_MS = 2_500L
         /** Hard cap on the total time a single CLI/RPC probe sequence can run. */
         private const val CLI_PROBE_TOTAL_CAP_MS = 15_000L
         private const val DESKTOP_LOCK_PROBE_RETRY_MS = 30_000L
@@ -2368,9 +2373,17 @@ class FlipperProtocol @Inject constructor() {
 
     private fun isRemoteFastPathReady(nowMs: Long): Boolean {
         val status = _cliStatus.value
-        if (status.level != CliCapabilityLevel.READY || !status.supportsRpc) {
-            return false
-        }
+        // Gate on RPC alone. A GUI input event travels over RPC and never touches the
+        // serial CLI, but this also demanded status.level == READY — and `level` lives
+        // on CliCapabilityStatus, describing the CLI.
+        //
+        // On firmware where the CLI probe fails or is deferred the level never reaches
+        // READY, so the fast path became permanently unreachable. Momentum in RPC-only
+        // transport reports exactly that: "RPC Ready (CLI Limited)", RPC ping
+        // acknowledged, CLI probe timed out after 15 s. Every press then fell through to
+        // the bootstrap, whose lock timeout loses to a busy pipeline at the round-trip
+        // times those links actually run at — and the button did nothing at all.
+        if (!status.supportsRpc) return false
         val ageMs = nowMs - status.checkedAtMs
         return ageMs <= RPC_REMOTE_FAST_RPC_STATUS_MAX_AGE_MS
     }

@@ -392,74 +392,40 @@ fun ChatScreen(
 
 @Composable
 private fun EmptyChat(onSuggestionClick: (String) -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    // Bottom-aligned, not centred. Centring in fillMaxSize put the prompts in the
+    // middle of the screen with a third of the display empty between them and the
+    // composer — and the composer is where the user is going next. Sitting the
+    // block just above it turns that void into ordinary head-room.
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Bottom
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Barrel ring icon вЂ” matches logo aesthetic
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .background(VesperOrange.copy(alpha = 0.08f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(Color.Transparent)
-                        .then(
-                            Modifier.background(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(VesperOrange.copy(alpha = 0.15f), Color.Transparent)
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "V",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Light,
-                        color = VesperOrange,
-                        fontFamily = FontFamily.Serif
-                    )
-                }
-            }
+        Text(
+            "Flipper AI",
+            style = MaterialTheme.typography.displayLarge,
+            color = TextPrimary
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            "Ask for a signal, a payload, or what is on the SD card.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = TextSecondary
+        )
 
-            Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-            Text(
-                "VESPER",
-                style = MaterialTheme.typography.labelLarge,
-                letterSpacing = 4.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-            )
-            Text(
-                "Your Flipper. Your rules.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                SuggestionChip("List files on the SD card", onClick = onSuggestionClick)
-                SuggestionChip("Forge a Sub-GHz signal", onClick = onSuggestionClick)
-                SuggestionChip("Create a universal remote for my TV", onClick = onSuggestionClick)
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                "Voice and image input supported",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
-            )
+        // Left-aligned and full width. Centred pills of three different lengths
+        // read as scattered; a flush left edge gives them a spine.
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SuggestionChip("List files on the SD card", onClick = onSuggestionClick)
+            SuggestionChip("Forge a Sub-GHz signal", onClick = onSuggestionClick)
+            SuggestionChip("Create a universal remote for my TV", onClick = onSuggestionClick)
         }
+
+        Spacer(modifier = Modifier.height(28.dp))
     }
 }
 
@@ -467,16 +433,28 @@ private fun EmptyChat(onSuggestionClick: (String) -> Unit) {
 private fun SuggestionChip(text: String, onClick: (String) -> Unit) {
     Surface(
         onClick = { onClick(text) },
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = GlassFill1,
+        border = BorderStroke(1.dp, GlassStroke)
     ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextPrimary
+            )
+            Icon(
+                Icons.Default.ArrowForward,
+                contentDescription = null,
+                tint = TextTertiary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
     }
 }
 
@@ -987,7 +965,10 @@ private fun ChatInputBar(
                             Icon(
                                 Icons.Default.AddAPhoto,
                                 contentDescription = "Attach image or take photo",
-                                tint = VesperOrange
+                                // Neutral. Attaching is a secondary action; colouring it
+                                // the same as Send made the bar read as three equal
+                                // buttons instead of one primary and two helpers.
+                                tint = TextSecondary
                             )
                         }
                     }
@@ -1045,7 +1026,10 @@ private fun ChatInputBar(
                             Icon(
                                 if (isListening) Icons.Default.Stop else Icons.Default.Mic,
                                 contentDescription = if (isListening) "Stop listening" else "Voice input",
-                                tint = VesperOrange
+                                // Accent only while recording — then it is state, not
+                                // decoration, and the one coloured thing on the bar is
+                                // the one thing currently happening.
+                                tint = if (isListening) VesperAccent else TextSecondary
                             )
                         }
                     }
@@ -1070,20 +1054,36 @@ private fun ChatInputBar(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(onSend = { if (hasContent) onSend() }),
                     shape = RoundedCornerShape(24.dp),
+                    // Every border removed. The field sits inside the composer pill,
+                    // which already has one — an outlined field there drew a second
+                    // rounded rectangle 6dp inside the first, and a box inside a box is
+                    // the single thing that made this bar look unfinished.
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VesperOrange,
-                        cursorColor = VesperOrange
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        disabledBorderColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        cursorColor = VesperAccent,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary
                     ),
                     maxLines = 4
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(4.dp))
 
                 FilledIconButton(
                     onClick = onSend,
                     enabled = enabled && hasContent && !isListening,
+                    // Accent only once there is something to send. A permanently
+                    // coloured button next to two coloured attachment icons gave the bar
+                    // three competing focal points and none of them meant anything.
                     colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = VesperOrange
+                        containerColor = VesperAccent,
+                        contentColor = Color(0xFF04121F),
+                        disabledContainerColor = GlassFill2,
+                        disabledContentColor = TextTertiary
                     )
                 ) {
                     if (isLoading) {

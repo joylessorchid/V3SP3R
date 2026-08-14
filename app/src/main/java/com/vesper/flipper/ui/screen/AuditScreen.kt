@@ -353,7 +353,8 @@ private fun CommandTimelineItemCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = GlassFill1
+            containerColor = GlassFill1,
+            contentColor = TextPrimary
         )
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -420,7 +421,8 @@ private fun AuditEntryItem(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = GlassFill1
+            containerColor = GlassFill1,
+            contentColor = TextPrimary
         )
     ) {
         Row(

@@ -488,7 +488,8 @@ private fun SignalDetailPanel(
 private fun SignalDetails(signal: SignalCapture) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = GlassFill1.copy(alpha = 0.5f)
+            containerColor = GlassFill1,
+            contentColor = TextPrimary.copy(alpha = 0.5f)
         )
     ) {
         Column(

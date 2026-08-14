@@ -256,11 +256,13 @@ private fun ConnectionStatusCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = when (connectionState) {
-                is ConnectionState.Connected -> VesperAccent.copy(alpha = 0.1f)
-                is ConnectionState.Connecting -> RiskMedium.copy(alpha = 0.1f)
-                is ConnectionState.Error -> RiskHigh.copy(alpha = 0.1f)
-                else -> MaterialTheme.colorScheme.surfaceVariant
-            }
+                is ConnectionState.Connected -> VesperAqua.copy(alpha = 0.12f)
+                is ConnectionState.Connecting,
+                is ConnectionState.Scanning -> RiskMedium.copy(alpha = 0.12f)
+                is ConnectionState.Error -> RiskHigh.copy(alpha = 0.12f)
+                else -> GlassFill1
+            },
+            contentColor = TextPrimary
         )
     ) {
         Row(
@@ -274,12 +276,17 @@ private fun ConnectionStatusCard(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
+                    // Green means connected. The disconnected branch used to fall to
+                    // colorScheme.secondary, which is the aqua accent — so a Flipper
+                    // that was NOT connected was announced with a bright green badge,
+                    // the one colour that means the opposite.
                     .background(
                         when (connectionState) {
-                            is ConnectionState.Connected -> VesperAccent
-                            is ConnectionState.Connecting -> RiskMedium
+                            is ConnectionState.Connected -> VesperAqua
+                            is ConnectionState.Connecting,
+                            is ConnectionState.Scanning -> RiskMedium
                             is ConnectionState.Error -> RiskHigh
-                            else -> MaterialTheme.colorScheme.secondary
+                            else -> GlassFill3
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -293,7 +300,16 @@ private fun ConnectionStatusCard(
                         else -> Icons.Default.Bluetooth
                     },
                     contentDescription = null,
-                    tint = Color.White
+                    // The coloured states carry a dark glyph for contrast against a
+                    // saturated fill; the disconnected badge is a pale glass disc, where
+                    // white on white would vanish.
+                    tint = when (connectionState) {
+                        is ConnectionState.Connected,
+                        is ConnectionState.Connecting,
+                        is ConnectionState.Scanning,
+                        is ConnectionState.Error -> Color(0xFF06121C)
+                        else -> TextSecondary
+                    }
                 )
             }
 
@@ -494,7 +510,8 @@ private fun DeviceInfoCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = GlassFill1
+            containerColor = GlassFill1,
+            contentColor = TextPrimary
         )
     ) {
         Column(
@@ -685,7 +702,8 @@ private fun CommandAutomationStatusCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = GlassFill1
+            containerColor = GlassFill1,
+            contentColor = TextPrimary
         )
     ) {
         Column(
@@ -850,7 +868,8 @@ private fun RemoteControlCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = GlassFill1
+            containerColor = GlassFill1,
+            contentColor = TextPrimary
         )
     ) {
         Column(
@@ -1040,7 +1059,8 @@ private fun DeviceListItem(
             .fillMaxWidth()
             .clickable(enabled = !isConnecting, onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = GlassFill1
+            containerColor = GlassFill1,
+            contentColor = TextPrimary
         )
     ) {
         Row(
@@ -1164,7 +1184,8 @@ private fun AdvancedOperationsSection(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = GlassFill1)
+        colors = CardDefaults.cardColors(containerColor = GlassFill1,
+            contentColor = TextPrimary)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             // Expandable Header

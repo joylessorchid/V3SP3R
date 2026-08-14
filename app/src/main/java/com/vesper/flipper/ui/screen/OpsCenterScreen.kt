@@ -469,7 +469,8 @@ private fun RunbooksCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = GlassFill1.copy(alpha = 0.55f)
+                        containerColor = GlassFill1,
+            contentColor = TextPrimary.copy(alpha = 0.55f)
                     )
                 ) {
                     Column(

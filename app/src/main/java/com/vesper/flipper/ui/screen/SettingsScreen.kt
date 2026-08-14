@@ -604,7 +604,8 @@ private fun SettingsSection(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = GlassFill1
+            containerColor = GlassFill1,
+            contentColor = TextPrimary
         )
     ) {
         Column(

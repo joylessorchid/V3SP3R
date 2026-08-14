@@ -305,7 +305,8 @@ private fun TrackedDeviceCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = GlassFill1
+            containerColor = GlassFill1,
+            contentColor = TextPrimary
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -456,9 +457,12 @@ private fun DeviceDetailSheet(
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var newNote by remember { mutableStateOf("") }
 
+    // Opaque, unlike the cards. A modal sheet sits over live content; a translucent
+    // one lets the list underneath show through and both become hard to read.
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = GlassFill1
+        containerColor = VesperSurface,
+        contentColor = TextPrimary
     ) {
         LazyColumn(
             modifier = Modifier
