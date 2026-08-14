@@ -23,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.vesper.flipper.domain.model.FileEntry
 import com.vesper.flipper.ui.components.GlassIconButton
 import com.vesper.flipper.ui.components.SectionLabel
+import com.vesper.flipper.ui.components.LocalOpenDrawer
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.FileBrowserViewModel
 
@@ -50,14 +51,20 @@ fun FileBrowserScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // One slot, two jobs: at the root there is nowhere to go up to, so
+                    // it opens the drawer instead of sitting there disabled.
                     if (state.currentPath != "/ext") {
                         GlassIconButton(
                             icon = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = "Up one folder",
                             onClick = { viewModel.navigateUp() }
                         )
                     } else {
-                        Spacer(Modifier.size(40.dp))
+                        GlassIconButton(
+                            icon = Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            onClick = LocalOpenDrawer.current
+                        )
                     }
                     GlassIconButton(
                         icon = Icons.Default.Refresh,

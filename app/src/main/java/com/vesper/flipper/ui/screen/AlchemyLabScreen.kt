@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vesper.flipper.domain.model.*
+import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.LocalOpenDrawer
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.AlchemyLabViewModel
 
@@ -71,33 +73,27 @@ fun AlchemyLabScreen(
         ) {
             // ═══════════════════ HEADER ═══════════════════
             item {
-                Column(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "Alchemy Lab",
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Surface(
-                            color = VesperOrange.copy(alpha = 0.2f),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(
-                                "AI FORGE",
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = VesperOrange,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            )
-                        }
-                    }
+                Column(modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp)) {
+                    GlassIconButton(
+                        icon = Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        onClick = LocalOpenDrawer.current
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    // The "AI FORGE" badge and the strapline are gone. A tag repeating
+                    // what the heading already says, in the accent colour, spends the
+                    // one colour that means "live" on decoration — and "Forge the
+                    // future" tells the reader nothing they can act on.
                     Text(
-                        "Craft payloads. Manage your arsenal. Forge the future.",
+                        "Alchemy Lab",
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        "Describe a signal or payload and it gets written to your Flipper.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextSecondary
                     )
                 }
             }

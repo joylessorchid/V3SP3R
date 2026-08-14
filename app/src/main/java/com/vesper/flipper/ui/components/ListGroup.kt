@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,6 +38,7 @@ import com.vesper.flipper.ui.theme.GlassFill2
 import com.vesper.flipper.ui.theme.TextPrimary
 import com.vesper.flipper.ui.theme.TextSecondary
 import com.vesper.flipper.ui.theme.TextTertiary
+import com.vesper.flipper.ui.theme.VesperAccent
 import com.vesper.flipper.ui.theme.VesperSurface
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -98,6 +100,32 @@ fun ListGroup(
         }
     }
 }
+
+/**
+ * Text-field colours for a field that lives INSIDE a [ListGroup].
+ *
+ * Borderless on purpose. An outlined field inside a rounded container draws a
+ * second rounded rectangle a few dp inside the first, and its floating label
+ * lands on top of the group's own edge — which is what made the settings screen
+ * look like boxes inside boxes. The group is the container; the field is a row
+ * in it.
+ */
+@Composable
+fun flatFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = Color.Transparent,
+    unfocusedBorderColor = Color.Transparent,
+    disabledBorderColor = Color.Transparent,
+    errorBorderColor = Color.Transparent,
+    focusedContainerColor = Color.Transparent,
+    unfocusedContainerColor = Color.Transparent,
+    disabledContainerColor = Color.Transparent,
+    focusedTextColor = TextPrimary,
+    unfocusedTextColor = TextPrimary,
+    disabledTextColor = TextSecondary,
+    focusedLabelColor = VesperAccent,
+    unfocusedLabelColor = TextTertiary,
+    cursorColor = VesperAccent
+)
 
 /** Hairline between rows, inset so it starts under the label rather than the icon. */
 @Composable

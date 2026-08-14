@@ -20,6 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vesper.flipper.data.SettingsStore
 import com.vesper.flipper.domain.model.Permission
+import androidx.compose.foundation.clickable
+import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.ListGroup
+import com.vesper.flipper.ui.components.LocalOpenDrawer
+import com.vesper.flipper.ui.components.flatFieldColors
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.SettingsViewModel
 import com.vesper.flipper.voice.OpenRouterTtsService
@@ -43,15 +48,25 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(padding),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+            // 22dp between groups, matching the device screen. The gap IS the
+            // separator now that the groups have no outer margin of their own.
+            verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
             item {
-                Text(
-                    "Settings",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = TextPrimary
-                )
+                Column {
+                    GlassIconButton(
+                        icon = Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        onClick = LocalOpenDrawer.current
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        "Settings",
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = TextPrimary
+                    )
+                }
             }
 
             // API Configuration Section
@@ -59,6 +74,7 @@ fun SettingsScreen(
                 SettingsSection(title = "API Configuration") {
                     // API Key
                     OutlinedTextField(
+                        colors = flatFieldColors(),
                         value = state.apiKey,
                         onValueChange = { viewModel.setApiKey(it) },
                         label = { Text("OpenRouter API Key") },
@@ -129,6 +145,7 @@ fun SettingsScreen(
                         onExpandedChange = { modelExpanded = it }
                     ) {
                         OutlinedTextField(
+                        colors = flatFieldColors(),
                             value = viewModel.getModelDisplayName(state.selectedModel),
                             onValueChange = {},
                             readOnly = true,
@@ -175,6 +192,7 @@ fun SettingsScreen(
                         onExpandedChange = { iterationsExpanded = it }
                     ) {
                         OutlinedTextField(
+                        colors = flatFieldColors(),
                             value = "${state.aiMaxIterations} rounds",
                             onValueChange = {},
                             readOnly = true,
@@ -229,6 +247,7 @@ fun SettingsScreen(
             item {
                 SettingsSection(title = "Permissions") {
                     OutlinedTextField(
+                        colors = flatFieldColors(),
                         value = state.defaultProjectPath,
                         onValueChange = { viewModel.setDefaultProjectPath(it) },
                         label = { Text("Default Project Path") },
@@ -246,6 +265,7 @@ fun SettingsScreen(
                         onExpandedChange = { durationExpanded = it }
                     ) {
                         OutlinedTextField(
+                        colors = flatFieldColors(),
                             value = formatDuration(state.permissionDuration),
                             onValueChange = {},
                             readOnly = true,
@@ -426,6 +446,7 @@ fun SettingsScreen(
                         onExpandedChange = { voiceExpanded = it }
                     ) {
                         OutlinedTextField(
+                        colors = flatFieldColors(),
                             value = currentVoice?.let { "${it.name} вЂ” ${it.description}" } ?: "Shimmer",
                             onValueChange = {},
                             readOnly = true,
@@ -488,6 +509,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         OutlinedTextField(
+                        colors = flatFieldColors(),
                             value = state.glassesBridgeUrl,
                             onValueChange = { viewModel.setGlassesBridgeUrl(it) },
                             label = { Text("Bridge Server URL") },
@@ -550,6 +572,7 @@ fun SettingsScreen(
                         onExpandedChange = { retentionExpanded = it }
                     ) {
                         OutlinedTextField(
+                        colors = flatFieldColors(),
                             value = "${state.auditRetentionDays} days",
                             onValueChange = {},
                             readOnly = true,
@@ -596,30 +619,20 @@ fun SettingsScreen(
     }
 }
 
+/**
+ * Every section on this screen goes through here, so converting the helper
+ * converts all nine at once — the title moves out of the container and becomes
+ * the caption above it, and the container becomes the grouped list used on the
+ * device screen. The title was also set in the accent colour, which spent the
+ * one colour that is supposed to mean "live" on nine static headings.
+ */
 @Composable
 private fun SettingsSection(
     title: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = GlassFill1,
-            contentColor = TextPrimary
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = VesperOrange
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            content()
-        }
+    ListGroup(label = title) {
+        Column(modifier = Modifier.padding(vertical = 4.dp), content = content)
     }
 }
 
@@ -630,28 +643,38 @@ private fun SettingsSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    // The whole row toggles, not just the switch. A 32dp target at the right edge
+    // is the smallest thing on the screen and the easiest to miss one-handed.
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!checked) }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = TextPrimary
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = TextTertiary
             )
         }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
+            modifier = Modifier.padding(start = 12.dp),
             colors = SwitchDefaults.colors(
-                checkedThumbColor = VesperOrange,
-                checkedTrackColor = VesperOrange.copy(alpha = 0.5f)
+                checkedThumbColor = Color(0xFF04121F),
+                checkedTrackColor = VesperAccent,
+                uncheckedThumbColor = TextTertiary,
+                uncheckedTrackColor = GlassFill3,
+                uncheckedBorderColor = GlassStroke
             )
         )
     }
