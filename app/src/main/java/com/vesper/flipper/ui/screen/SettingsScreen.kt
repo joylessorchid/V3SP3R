@@ -631,8 +631,11 @@ private fun SettingsSection(
     title: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    ListGroup(label = title) {
-        Column(modifier = Modifier.padding(vertical = 4.dp), content = content)
+    // 16dp horizontal, because these sections hold raw Texts and text fields
+    // rather than ListRows — without it every explanatory line ran flush to the
+    // container edge and the supporting text under the fields spilled past it.
+    ListGroup(label = title, contentPadding = 16.dp) {
+        Column(modifier = Modifier.padding(vertical = 14.dp), content = content)
     }
 }
 
@@ -645,11 +648,14 @@ private fun SettingsSwitch(
 ) {
     // The whole row toggles, not just the switch. A 32dp target at the right edge
     // is the smallest thing on the screen and the easiest to miss one-handed.
+    // Vertical padding only: the enclosing SettingsSection group already supplies
+    // the 16dp horizontal inset, and adding it again here would indent switch rows
+    // 32dp while every neighbouring line sat at 16dp.
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!checked) }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

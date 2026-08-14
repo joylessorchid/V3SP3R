@@ -66,12 +66,19 @@ private val GroupShape = RoundedCornerShape(18.dp)
  * @param label small caption above the group; omit for an unlabelled group
  * @param footer explanation below the group, outside the container — the place
  *        for the sentence that would otherwise bloat a row into two lines
+ * @param contentPadding horizontal inset for the group's children. Zero when the
+ *        group holds [ListRow]s, because a row carries its own 16dp and needs to
+ *        run full-bleed so its pressed highlight reaches the container edge.
+ *        Groups holding raw content — a Text, a text field — must pass 16.dp, or
+ *        that content sits flush against the container edge and reads as
+ *        overflowing it.
  */
 @Composable
 fun ListGroup(
     modifier: Modifier = Modifier,
     label: String? = null,
     footer: String? = null,
+    contentPadding: Dp = 0.dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -87,7 +94,8 @@ fun ListGroup(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(GroupShape)
-                .background(VesperSurface),
+                .background(VesperSurface)
+                .padding(horizontal = contentPadding),
             content = content
         )
         if (footer != null) {
