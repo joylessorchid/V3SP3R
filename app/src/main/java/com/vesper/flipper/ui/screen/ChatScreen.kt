@@ -46,6 +46,7 @@ import com.vesper.flipper.ui.components.ApprovalDialog
 import com.vesper.flipper.ui.components.DiffViewer
 import com.vesper.flipper.ui.components.GlassIconButton
 import com.vesper.flipper.ui.components.LocalOpenDrawer
+import com.vesper.flipper.ui.components.MarkdownText
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.ChatViewModel
 import com.vesper.flipper.voice.SpeechState
@@ -563,15 +564,18 @@ private fun ChatMessageItem(
                     }
 
                     if (message.content.isNotEmpty()) {
-                        Text(
-                            text = message.content,
-                            color = if (isTool) TextSecondary else TextPrimary,
-                            // The answer is the thing people actually read, so it gets
-                            // the paragraph setting (16sp/25sp) rather than the compact
-                            // one shared with chrome.
-                            style = if (isAssistant) MaterialTheme.typography.bodyLarge
-                            else MaterialTheme.typography.bodyMedium
-                        )
+                        if (isAssistant) {
+                            // The model answers in markdown. Drawn with a plain Text it
+                            // arrived as literal syntax — "**Files:**" with the stars
+                            // showing and every path wrapped in grave accents.
+                            MarkdownText(text = message.content)
+                        } else {
+                            Text(
+                                text = message.content,
+                                color = if (isTool) TextSecondary else TextPrimary,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
 
                     // Show tool calls

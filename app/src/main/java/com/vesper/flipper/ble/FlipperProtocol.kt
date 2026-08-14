@@ -2371,21 +2371,35 @@ class FlipperProtocol @Inject constructor() {
         return sent
     }
 
+    /**
+     * Whether a GUI input event can go straight down the wire.
+     *
+     * Judged on OBSERVED RPC traffic, not on what the capability probe concluded.
+     * Two earlier versions of this gate got it wrong in the same way, both times by
+     * asking a proxy question instead of the real one:
+     *
+     *  - it first required cliStatus.level == READY. That field lives on
+     *    CliCapabilityStatus and describes the serial CLI, which a GUI input event
+     *    never touches. On firmware where the CLI probe fails the level never
+     *    reaches READY, so the fast path was unreachable forever.
+     *  - it then required cliStatus.supportsRpc. Better, but that flag is cleared
+     *    back to false on every connection reset (see the reset handler, which
+     *    writes "Connection reset. Capability will be rechecked.") and is only
+     *    restored by a probe that, on a busy pipeline, times out after 15 s.
+     *
+     * In both cases the device was plainly speaking RPC the whole time — ping
+     * acknowledged, device info returned, storage listed — while the app insisted
+     * it was not ready. lastRpcActivityAtMs is set by every successful RPC send and
+     * receive, so it answers the actual question: did RPC just work?
+     */
     private fun isRemoteFastPathReady(nowMs: Long): Boolean {
+        val sinceRpc = nowMs - lastRpcActivityAtMs
+        if (lastRpcActivityAtMs > 0L && sinceRpc in 0..RPC_REMOTE_FAST_RPC_STATUS_MAX_AGE_MS) {
+            return true
+        }
         val status = _cliStatus.value
-        // Gate on RPC alone. A GUI input event travels over RPC and never touches the
-        // serial CLI, but this also demanded status.level == READY — and `level` lives
-        // on CliCapabilityStatus, describing the CLI.
-        //
-        // On firmware where the CLI probe fails or is deferred the level never reaches
-        // READY, so the fast path became permanently unreachable. Momentum in RPC-only
-        // transport reports exactly that: "RPC Ready (CLI Limited)", RPC ping
-        // acknowledged, CLI probe timed out after 15 s. Every press then fell through to
-        // the bootstrap, whose lock timeout loses to a busy pipeline at the round-trip
-        // times those links actually run at — and the button did nothing at all.
         if (!status.supportsRpc) return false
-        val ageMs = nowMs - status.checkedAtMs
-        return ageMs <= RPC_REMOTE_FAST_RPC_STATUS_MAX_AGE_MS
+        return (nowMs - status.checkedAtMs) <= RPC_REMOTE_FAST_RPC_STATUS_MAX_AGE_MS
     }
 
     private fun shouldProbeDesktopLockForRemoteInput(nowMs: Long): Boolean {
