@@ -34,6 +34,9 @@ import com.vesper.flipper.ble.FlipperDevice
 import com.vesper.flipper.domain.model.FlipperRemoteButton
 import com.vesper.flipper.glasses.BridgeState
 import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.ListDivider
+import com.vesper.flipper.ui.components.ListGroup
+import com.vesper.flipper.ui.components.ListRow
 import com.vesper.flipper.ui.components.SectionLabel
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.DeviceViewModel
@@ -699,159 +702,95 @@ private fun CommandAutomationStatusCard(
         )
     }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = GlassFill1,
-            contentColor = TextPrimary
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Memory,
-                    contentDescription = null,
-                    tint = tint
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = detail,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+    // Three grouped lists instead of one dense card. The values used to be glued
+    // into pipe-separated sentences — "Firmware: Unknown | Mode: Unavailable |
+    // Confidence: 0%" — which is a log line, not an interface: nothing can be found
+    // in it at a glance and it wraps unpredictably. One fact per row instead.
+    Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
+
+        ListGroup(label = "Automation", footer = detail) {
+            ListRow(
+                title = title,
+                icon = Icons.Default.Memory,
+                iconTint = tint
+            )
+            ListDivider()
+            ListRow(
+                title = if (isRunningDiagnostics) "Running link diagnostics…" else "Run link diagnostics",
+                icon = Icons.Default.BugReport,
+                iconTint = if (isRunningDiagnostics) TextTertiary else VesperAccent,
+                onClick = if (isRunningDiagnostics) null else onRunDiagnostics,
+                trailing = if (isRunningDiagnostics) {
+                    {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            color = VesperAccent,
+                            strokeWidth = 2.dp
+                        )
+                    }
+                } else null,
+                showChevron = !isRunningDiagnostics
+            )
+        }
+
+        ListGroup(label = "Compatibility", footer = firmwareCompatibility.notes) {
+            ListRow(title = "Firmware", value = firmwareCompatibility.label)
+            ListDivider()
+            ListRow(
+                title = "Transport",
+                value = when (firmwareCompatibility.transportMode) {
+                    FirmwareTransportMode.CLI_AND_RPC -> "CLI + RPC"
+                    FirmwareTransportMode.CLI_ONLY -> "CLI only"
+                    FirmwareTransportMode.RPC_ONLY -> "RPC only"
+                    FirmwareTransportMode.PROBING -> "Probing…"
+                    FirmwareTransportMode.UNAVAILABLE -> "Unavailable"
                 }
-            }
+            )
+            ListDivider()
+            ListRow(
+                title = "Confidence",
+                value = "${(firmwareCompatibility.confidence * 100f).toInt()}%"
+            )
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
+        ListGroup(label = "Link quality") {
+            ListRow(title = "Profile", value = autotuneStatus.profileLabel)
+            ListDivider()
+            ListRow(
+                title = "Success rate",
+                value = "${(autotuneStatus.successRate * 100f).toInt()}%"
+            )
+            ListDivider()
+            ListRow(title = "Average latency", value = "${autotuneStatus.averageLatencyMs} ms")
+            ListDivider()
+            ListRow(
+                title = "Retries",
+                subtitle = "CLI ${autotuneStatus.cliRetryAttempts} · RPC ${autotuneStatus.rpcRetryAttempts} · write ${autotuneStatus.fileWriteRetryAttempts}",
+                value = if (autotuneStatus.busySignals > 0 || autotuneStatus.disconnectSignals > 0) {
+                    "busy ${autotuneStatus.busySignals} · drop ${autotuneStatus.disconnectSignals}"
+                } else "clean"
+            )
+        }
 
-            FilledTonalButton(
-                onClick = onRunDiagnostics,
-                enabled = !isRunningDiagnostics
+        if (diagnostics.checks.isNotEmpty()) {
+            ListGroup(
+                label = "Last diagnostics",
+                footer = "${diagnostics.summary} · ${diagnostics.durationMs} ms"
             ) {
-                if (isRunningDiagnostics) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Running link diagnostics...")
-                } else {
-                    Icon(Icons.Default.BugReport, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Run Link Diagnostics")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-            Divider()
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "Compatibility Layer",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = buildString {
-                    append("Firmware: ")
-                    append(firmwareCompatibility.label)
-                    append(" | Mode: ")
-                    append(
-                        when (firmwareCompatibility.transportMode) {
-                            FirmwareTransportMode.CLI_AND_RPC -> "CLI + RPC"
-                            FirmwareTransportMode.CLI_ONLY -> "CLI-only"
-                            FirmwareTransportMode.RPC_ONLY -> "RPC-only"
-                            FirmwareTransportMode.PROBING -> "Probing…"
-                            FirmwareTransportMode.UNAVAILABLE -> "Unavailable"
-                        }
-                    )
-                    append(" | Confidence: ")
-                    append((firmwareCompatibility.confidence * 100f).toInt())
-                    append('%')
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = firmwareCompatibility.notes,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-            Divider()
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "Connection Autotuner",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = buildString {
-                    append("Profile: ")
-                    append(autotuneStatus.profileLabel)
-                    append(" | Success: ")
-                    append((autotuneStatus.successRate * 100f).toInt())
-                    append("% | Avg latency: ")
-                    append(autotuneStatus.averageLatencyMs)
-                    append("ms")
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = "Retries cli=${autotuneStatus.cliRetryAttempts} rpc=${autotuneStatus.rpcRetryAttempts} write=${autotuneStatus.fileWriteRetryAttempts} | busy=${autotuneStatus.busySignals} disconnect=${autotuneStatus.disconnectSignals}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            if (diagnostics.checks.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "${diagnostics.summary} (${diagnostics.durationMs} ms)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                diagnostics.checks.forEach { check ->
+                diagnostics.checks.forEachIndexed { index, check ->
+                    if (index > 0) ListDivider()
                     val (icon, checkTint) = when (check.level) {
-                        ConnectionCheckLevel.PASS -> Icons.Default.CheckCircle to VesperAccent
+                        ConnectionCheckLevel.PASS -> Icons.Default.CheckCircle to VesperAqua
                         ConnectionCheckLevel.WARN -> Icons.Default.Warning to RiskMedium
                         ConnectionCheckLevel.FAIL -> Icons.Default.Error to RiskHigh
-                        ConnectionCheckLevel.SKIPPED -> Icons.Default.RemoveCircleOutline to MaterialTheme.colorScheme.onSurfaceVariant
+                        ConnectionCheckLevel.SKIPPED -> Icons.Default.RemoveCircleOutline to TextTertiary
                     }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = checkTint,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "${check.name}: ${check.detail}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    ListRow(
+                        title = check.name,
+                        subtitle = check.detail,
+                        icon = icon,
+                        iconTint = checkTint
+                    )
                 }
             }
         }
