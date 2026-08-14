@@ -155,4 +155,11 @@ dependencies {
 
     // Diff utils
     implementation("io.github.java-diff-utils:java-diff-utils:4.12")
+
+    // Unit tests. app/src/test holds 139 tests across 11 files — including
+    // RiskAssessorTest, which pins the LOW/MEDIUM/HIGH/BLOCKED decisions that
+    // gate BadUSB and recursive delete. None of it declared a dependency, so the
+    // suite had never compiled and those assertions ran nowhere.
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
 }
