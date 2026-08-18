@@ -95,7 +95,30 @@ enum class FlipperResourceType(
     EVIL_PORTAL("Evil Portal", "🕸", 0xFFE91E63, "/ext/apps_data/evil_portal"),
     MUSIC("Music / RTTTL", "🎵", 0xFF2196F3, "/ext/music_player"),
     ANIMATIONS("Animations", "🐬", 0xFF00BCD4, "/ext/dolphin"),
-    GPIO_TOOLS("GPIO / Hardware", "⚡", 0xFFFFEB3B, "/ext/gpio")
+    GPIO_TOOLS("GPIO / Hardware", "⚡", 0xFFFFEB3B, "/ext/gpio");
+
+    /**
+     * Words a user is likely to type for this category. The display names are
+     * abbreviations ("IR Remotes", "Sub-GHz"), so a search for the full word —
+     * "infrared", "subghz", "badusb" — matched nothing, which is why searching for
+     * the most natural term returned zero results. Matching a type by its synonyms
+     * lets the query name a category directly.
+     */
+    val searchSynonyms: List<String>
+        get() = when (this) {
+            IR_REMOTE -> listOf("ir", "infrared", "remote", "irdb")
+            SUB_GHZ -> listOf("subghz", "sub-ghz", "sub ghz", "rf", "433", "315", "868", "rolling")
+            BAD_USB -> listOf("badusb", "bad usb", "ducky", "duckyscript", "hid", "keystroke")
+            NFC_FILES -> listOf("nfc", "mifare", "card", "tag")
+            EVIL_PORTAL -> listOf("evil portal", "captive", "wifi", "phish", "esp32")
+            MUSIC -> listOf("music", "rtttl", "song", "tune")
+            ANIMATIONS -> listOf("animation", "dolphin", "gif")
+            GPIO_TOOLS -> listOf("gpio", "hardware", "pin", "uart")
+        }
+
+    fun matchesQuery(lowerQuery: String): Boolean =
+        displayName.lowercase().contains(lowerQuery) ||
+            searchSynonyms.any { it.contains(lowerQuery) || lowerQuery.contains(it) }
 }
 
 /**
@@ -281,12 +304,16 @@ object FlipperResourceLibrary {
     }
 
     fun search(query: String): List<FlipperResourceRepo> {
-        val lq = query.lowercase()
+        val lq = query.lowercase().trim()
+        if (lq.isEmpty()) return repositories
         return repositories.filter {
             it.name.lowercase().contains(lq) ||
             it.description.lowercase().contains(lq) ||
             it.tags.any { t -> t.lowercase().contains(lq) } ||
-            it.author.lowercase().contains(lq)
+            it.author.lowercase().contains(lq) ||
+            // A query naming the category ("infrared", "subghz") matches every repo
+            // of that type, which the name/description/tag/author search could not do.
+            it.resourceType.matchesQuery(lq)
         }
     }
 }
