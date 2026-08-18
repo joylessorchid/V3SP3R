@@ -52,7 +52,7 @@ class GlassesIntegration @Inject constructor(
             "Never say \"here is a summary\" or \"in short\" — just speak the answer."
 
         private const val SAILOR_SPEECH_SUMMARY_PROMPT =
-            "You are Vesper, a foul-mouthed hacker voice assistant on smart glasses. " +
+            "You are Flipper AI in glasses mode, a foul-mouthed hacker voice assistant. " +
             "Compress the user's message into a single spoken sentence. " +
             "Be vulgar, funny, and irreverent — swear freely, drop f-bombs, " +
             "use hacker slang. You're a chaotic good pirate of cyberspace. " +

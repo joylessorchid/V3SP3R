@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vesper.flipper.domain.model.*
+import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.LocalOpenDrawer
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.*
 import kotlin.math.PI
@@ -69,6 +71,17 @@ fun SpectralOracleScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            // Menu affordance — this screen has no bar, so without it the drawer is
+            // only reachable by edge-swipe.
+            Row(modifier = Modifier.fillMaxWidth()) {
+                GlassIconButton(
+                    icon = Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    onClick = LocalOpenDrawer.current
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+
             // Header
             OracleHeader()
 

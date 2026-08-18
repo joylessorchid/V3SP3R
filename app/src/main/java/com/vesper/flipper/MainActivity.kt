@@ -164,6 +164,7 @@ fun VesperApp() {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val openDrawer = remember(scope, drawerState) { { scope.launch { drawerState.open() }; Unit } }
 
     fun go(screen: Screen) {
         scope.launch { drawerState.close() }
@@ -203,7 +204,7 @@ fun VesperApp() {
             }
         }
     ) {
-    CompositionLocalProvider(LocalOpenDrawer provides { scope.launch { drawerState.open() } }) {
+    CompositionLocalProvider(LocalOpenDrawer provides openDrawer) {
     Box(
         modifier = Modifier
             .fillMaxSize()

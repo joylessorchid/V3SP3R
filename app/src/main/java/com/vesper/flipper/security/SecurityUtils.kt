@@ -177,6 +177,16 @@ class EncryptedStorage(context: Context) {
         encryptedPrefs.edit().putString(key, value).apply()
     }
 
+    /**
+     * Synchronous write. Used by the plaintext->encrypted migration so the
+     * encrypted value is durably on disk BEFORE the plaintext copy is deleted; a
+     * process kill in that window must not be able to drop the key. Returns whether
+     * the commit succeeded.
+     */
+    fun putStringSync(key: String, value: String): Boolean {
+        return encryptedPrefs.edit().putString(key, value).commit()
+    }
+
     fun getString(key: String): String? {
         return encryptedPrefs.getString(key, null)
     }

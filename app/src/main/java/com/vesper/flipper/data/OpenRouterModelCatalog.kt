@@ -58,7 +58,9 @@ class OpenRouterModelCatalog @Inject constructor() {
                 // conversation where nothing ever happens. It was previously possible
                 // to select exactly that.
                 val usable = data.mapNotNull { element ->
-                    val modelObj = element.jsonObject
+                    // Skip anything that is not a well-formed model object rather
+                    // than letting one malformed entry abort the whole fetch.
+                    val modelObj = (element as? JsonObject) ?: return@mapNotNull null
                     val id = modelObj.string("id") ?: return@mapNotNull null
 
                     val supportsTools = modelObj["supported_parameters"]?.let { params ->
@@ -151,7 +153,7 @@ class OpenRouterModelCatalog @Inject constructor() {
 
         // Provider prefixes as OpenRouter spells them in a model id, e.g. the "google"
         // of "google/gemini-3.7-flash". A prefix that OpenRouter no longer serves is
-        // not merely inert: fetchLatestByManufacturer() fills the gap from
+        // not merely inert: fetchLatestByManufacturer() previously filled gaps from
         // SettingsStore.FALLBACK_MODELS, so a stale prefix puts a stale model into the
         // live picker. Keep this aligned with FALLBACK_MODELS, same order.
         //

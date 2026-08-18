@@ -18,7 +18,7 @@
     <string name="ble_error">Connection error: %s</string>
 
     <!-- Chat -->
-    <string name="chat_hint">Ask Vesper to control your Flipper…</string>
+    <string name="chat_hint">Ask Flipper AI to control your Flipper…</string>
     <string name="chat_send">Send</string>
     <string name="chat_thinking">Thinking…</string>
 
@@ -64,7 +64,7 @@
 
     <!-- Widget -->
     <string name="widget_description">Quick-launch signals from your home screen</string>
-    <string name="widget_name">Vesper Signals</string>
+    <string name="widget_name">Flipper AI Signals</string>
     <string name="widget_signals_title">⚡ Signals</string>
     <string name="widget_refresh">Refresh</string>
     <string name="widget_signal_1">Signal 1</string>

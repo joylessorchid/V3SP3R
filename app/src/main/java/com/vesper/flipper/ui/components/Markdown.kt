@@ -77,7 +77,15 @@ private fun parseBlocks(source: String): List<MdBlock> {
                     body.appendLine(lines[i])
                     i++
                 }
-                blocks += MdBlock.Code(body.toString().trimEnd('\n'), language)
+                if (i >= lines.size) {
+                    // Ran off the end with no closing fence: a stray ``` from
+                    // the model, not a real block. Render as a paragraph so the
+                    // rest of the reply does not become monospace.
+                    val text = body.toString().trim()
+                    if (text.isNotEmpty()) blocks += MdBlock.Paragraph(text)
+                } else {
+                    blocks += MdBlock.Code(body.toString().trimEnd('\n'), language)
+                }
             }
 
             line.trimStart().startsWith("#") -> {

@@ -45,8 +45,13 @@ class SettingsStore @Inject constructor(
     private suspend fun readApiKey(): String? = withContext(Dispatchers.IO) {
         val legacy = context.dataStore.data.first()[LEGACY_API_KEY]
         if (!legacy.isNullOrBlank()) {
-            encryptedStorage.putString(SECURE_API_KEY, legacy)
-            context.dataStore.edit { it.remove(LEGACY_API_KEY) }
+            // Commit the encrypted copy and confirm it reads back before deleting the
+            // plaintext. A hard-kill between an async write and the plaintext removal
+            // could otherwise drop the key entirely, forcing the user to re-enter it.
+            val committed = encryptedStorage.putStringSync(SECURE_API_KEY, legacy)
+            if (committed && encryptedStorage.getString(SECURE_API_KEY) == legacy) {
+                context.dataStore.edit { it.remove(LEGACY_API_KEY) }
+            }
             return@withContext legacy
         }
         encryptedStorage.getString(SECURE_API_KEY)
@@ -54,8 +59,9 @@ class SettingsStore @Inject constructor(
 
     suspend fun setApiKey(key: String) {
         withContext(Dispatchers.IO) {
-            encryptedStorage.putString(SECURE_API_KEY, key)
-            // Drop any stale plaintext copy left by an older build.
+            // Durable write first, then drop any stale plaintext copy from an older
+            // build — never the other way round.
+            encryptedStorage.putStringSync(SECURE_API_KEY, key)
             context.dataStore.edit { it.remove(LEGACY_API_KEY) }
         }
         apiKeyRevision.value += 1

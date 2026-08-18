@@ -89,6 +89,15 @@ class FlipperProtocol @Inject constructor() {
         rpcStartCandidateCache.clear()
         rpcButtonArgCache.clear()
         lastRpcExecutionSnapshot = null
+        // Zero the RPC-activity watermark. isRemoteFastPathReady trusts it to mean
+        // "RPC just worked", but a reset means the Flipper's RPC session died and it
+        // may have fallen back to CLI mode. Left stale, a button press within the 7.5s
+        // window would take the fast path, write protobuf the device now ignores,
+        // refresh the watermark from that fire-and-forget write, and latch the fast
+        // path open forever — skipping the bootstrap that re-establishes RPC. Clearing
+        // it forces the next press down the recovery path until real RPC traffic
+        // succeeds again.
+        lastRpcActivityAtMs = 0L
         _cliStatus.value = CliCapabilityStatus(
             level = CliCapabilityLevel.UNKNOWN,
             checkedAtMs = System.currentTimeMillis(),

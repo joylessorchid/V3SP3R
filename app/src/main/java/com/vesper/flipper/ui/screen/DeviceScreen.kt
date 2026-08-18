@@ -197,10 +197,14 @@ fun DeviceScreen(
             }
 
             // Device Info Card (when connected)
-            if (connectionState is ConnectionState.Connected && deviceInfo != null) {
+            // Capture into a local so the item lambda cannot see deviceInfo flip to
+            // null mid-composition: disconnect() nulls deviceInfo while connectionState
+            // is briefly still Connected, and the !! would then NPE.
+            val info = deviceInfo
+            if (connectionState is ConnectionState.Connected && info != null) {
                 item {
                     DeviceInfoCard(
-                        deviceInfo = deviceInfo!!,
+                        deviceInfo = info,
                         storageInfo = storageInfo
                     )
                 }

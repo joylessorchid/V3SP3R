@@ -42,7 +42,13 @@ fun SettingsScreen(
     // No app bar. Settings has no actions to put in one, so a bar here spent a row
     // of the screen rendering the word "Settings" at 20sp. The heading moves into
     // the content where it can be set at a size that actually leads the page.
-    Scaffold(containerColor = Color.Transparent) { padding ->
+    // contentWindowInsets(0): without a topBar the Scaffold would still hand its
+    // content the status-bar inset via `padding`, and this screen also applies
+    // statusBarsPadding() — the two stacked into an empty band above the heading.
+    Scaffold(
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -546,7 +552,7 @@ fun SettingsScreen(
 
                         SettingsSwitch(
                             title = "Sailor Mouth Mode",
-                            subtitle = "Vesper swears like a hacker. Not for the faint of heart.",
+                            subtitle = "Flipper AI swears like a hacker. Not for the faint of heart.",
                             checked = state.glassesSailorMouth,
                             onCheckedChange = { viewModel.setGlassesSailorMouth(it) }
                         )

@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Stop
@@ -64,6 +65,7 @@ import com.vesper.flipper.ble.ConnectionState
 import com.vesper.flipper.ble.FirmwareCompatibilityProfile
 import com.vesper.flipper.domain.model.FlipperRemoteButton
 import com.vesper.flipper.ui.components.GlassIconButton
+import com.vesper.flipper.ui.components.LocalOpenDrawer
 import com.vesper.flipper.ui.components.SectionLabel
 import com.vesper.flipper.ui.theme.*
 import com.vesper.flipper.ui.viewmodel.DeviceViewModel
@@ -240,8 +242,13 @@ fun OpsCenterScreen(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    GlassIconButton(
+                        icon = Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        onClick = LocalOpenDrawer.current
+                    )
                     if (isRunningDiagnostics) {
                         Box(
                             modifier = Modifier.size(40.dp),

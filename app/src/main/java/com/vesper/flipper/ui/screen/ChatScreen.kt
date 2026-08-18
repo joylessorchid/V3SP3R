@@ -11,6 +11,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -907,6 +909,11 @@ private fun ChatInputBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            // Lift the floating composer above the keyboard and the gesture bar. Under
+            // forced edge-to-edge (targetSdk 35) neither is handled by the Scaffold, so
+            // without these the input sat under the IME and the nav bar.
+            .imePadding()
+            .navigationBarsPadding()
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Column(
