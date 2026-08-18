@@ -771,36 +771,18 @@ private fun LoadingIndicator(progress: AgentProgress?) {
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(VesperWine, VesperWineDark)
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                "V",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Light,
-                fontFamily = FontFamily.Serif,
-                color = VesperGold
-            )
-        }
-        Spacer(modifier = Modifier.width(8.dp))
+        // Was a wine circle with a serif "V" — the retired VESPER identity, which
+        // also had the model believing its name was Vesper. Just the spinner now.
         CircularProgressIndicator(
-            modifier = Modifier.size(24.dp),
-            color = VesperGold,
+            modifier = Modifier.size(20.dp),
+            color = VesperAccent,
             strokeWidth = 2.dp
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(12.dp))
         Text(
             label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = TextSecondary
         )
     }
 }

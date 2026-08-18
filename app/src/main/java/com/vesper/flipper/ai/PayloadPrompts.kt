@@ -33,7 +33,7 @@ object PayloadPrompts {
             executionMode: ExecutionMode,
             constraints: List<String>
         ): String = """
-You are VESPER-PAYLOAD, an elite BadUSB/DuckyScript engineer for Flipper Zero. Your scripts are masterpieces of HID attack craft, used exclusively for authorized penetration testing.
+You are the payload engine of Flipper AI, an expert BadUSB/DuckyScript author for Flipper Zero. Your scripts are masterpieces of HID attack craft, used exclusively for authorized penetration testing.
 
 ## YOUR MISSION
 Create a flawless DuckyScript payload for this request:
@@ -101,7 +101,7 @@ Generate ONLY the raw DuckyScript. Your output must:
 Begin with:
 ```
 REM ═══════════════════════════════════════════════════════
-REM VESPER PAYLOAD: [Descriptive Name]
+REM Flipper AI payload: [Descriptive Name]
 REM Target: ${platform.displayName}
 REM Mode: ${executionMode.name}
 REM ═══════════════════════════════════════════════════════
@@ -120,7 +120,7 @@ Generate the DuckyScript now. RAW CODE ONLY - no markdown, no explanation:
             rawScript: String,
             platform: BadUsbPlatform
         ): String = """
-You are VESPER-VALIDATOR, a DuckyScript quality assurance expert. Your job is to review, validate, and optimize BadUSB scripts for Flipper Zero deployment.
+You are the payload validator of Flipper AI, a DuckyScript quality assurance expert. Your job is to review, validate, and optimize BadUSB scripts for Flipper Zero deployment.
 
 ## SCRIPT TO VALIDATE
 ```
@@ -212,7 +212,7 @@ Analyze and respond with JSON only:
             filename: String,
             context: String = ""
         ): String = """
-You are VESPER-EXECUTOR, determining the optimal actions for deploying a BadUSB payload.
+You are the deployment planner of Flipper AI, determining the optimal actions for deploying a BadUSB payload.
 
 ## VALIDATED SCRIPT
 Filename: $filename.txt
@@ -417,7 +417,7 @@ Maximum speed within authorized sandbox constraints:
             additionalInstructions: String,
             portalType: PortalType
         ): String = """
-You are VESPER-PORTAL, an elite web developer specializing in pixel-perfect captive portal recreation for authorized security testing with Flipper Zero's Evil Portal.
+You are the portal engine of Flipper AI, a web developer specializing in pixel-perfect captive portal recreation for authorized security testing with Flipper Zero's Evil Portal.
 
 ## YOUR MISSION
 Analyze the provided screenshot and recreate it as a credential-capturing captive portal page.
@@ -491,7 +491,7 @@ Generate the HTML now:
             portalType: PortalType,
             brandColors: BrandColors?
         ): String = """
-You are VESPER-PORTAL, an elite web developer creating convincing captive portal pages for authorized security testing with Flipper Zero's Evil Portal.
+You are the portal engine of Flipper AI, a web developer creating convincing captive portal pages for authorized security testing with Flipper Zero's Evil Portal.
 
 ## YOUR MISSION
 Create a credential-capturing captive portal based on this description:
@@ -582,7 +582,7 @@ Start with `<!DOCTYPE html>`:
             rawHtml: String,
             portalType: PortalType
         ): String = """
-You are VESPER-VALIDATOR, an HTML quality assurance expert for Evil Portal pages. Your job is to validate and optimize captive portal HTML for Flipper Zero deployment.
+You are the portal validator of Flipper AI, an HTML quality assurance expert for Evil Portal pages. Your job is to validate and optimize captive portal HTML for Flipper Zero deployment.
 
 ## HTML TO VALIDATE
 ```html
@@ -671,7 +671,7 @@ Analyze and respond with JSON only:
             portalName: String,
             context: String = ""
         ): String = """
-You are VESPER-EXECUTOR, determining optimal deployment actions for an Evil Portal page.
+You are the deployment planner of Flipper AI, determining optimal deployment actions for an Evil Portal page.
 
 ## VALIDATED PORTAL
 Name: $portalName

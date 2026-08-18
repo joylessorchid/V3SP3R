@@ -67,6 +67,24 @@ object FirmwareCompatibilityLayer {
             )
         }
 
+        // A command with an RPC mapping is allowed through the RPC bridge as long as
+        // the transport is not explicitly torn down, WITHOUT first consulting
+        // supportsRpc. That flag comes from the CLI capability probe, which on
+        // BLE-only firmware (Momentum reports exactly this) fails or is deferred, and
+        // it is cleared to false on every connection reset. Gating a mapped command on
+        // it meant "transmit this .sub", "run this BadUSB", "emulate this card" were
+        // refused with "transport unavailable" while RPC was in fact working — the
+        // same stale-flag failure that stopped the remote buttons. The RPC send itself
+        // is the real test: if RPC is genuinely down the bridge returns a clean error,
+        // rather than the command being blocked before it is ever attempted.
+        if (hasRpcMapping && profile.transportMode != FirmwareTransportMode.UNAVAILABLE) {
+            return FirmwareCommandCompatibility(
+                supported = true,
+                route = FirmwareCommandRoute.RPC_APP_BRIDGE,
+                message = "Routing via RPC app bridge."
+            )
+        }
+
         if (!profile.supportsCli && !profile.supportsRpc) {
             return FirmwareCommandCompatibility(
                 supported = false,
